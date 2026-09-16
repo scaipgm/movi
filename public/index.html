@@ -5,43 +5,59 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Consulta DNI & BCRA</title>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #eef2f7; margin: 0; padding: 20px; }
-        .card { max-width: 500px; margin: 20px auto; background: white; padding: 25px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #eef2f7; margin: 0; padding: 15px; }
+        .card { max-width: 550px; margin: 20px auto; background: white; padding: 25px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
         h2 { margin-top: 0; color: #1a202c; text-align: center; }
         label { display: block; margin-top: 15px; font-weight: 600; color: #4a5568; }
         input, select, button { width: 100%; padding: 12px; margin-top: 6px; border-radius: 6px; border: 1px solid #cbd5e0; box-sizing: border-box; font-size: 15px; }
         button { background: #2b6cb0; color: white; border: none; font-weight: 600; margin-top: 20px; cursor: pointer; }
         button:hover { background: #2c5282; }
-        .resultado { margin-top: 15px; padding: 15px; border-radius: 6px; background: #f7fafc; border: 1px solid #e2e8f0; }
-        .badge { display: inline-block; padding: 3px 8px; border-radius: 4px; font-size: 13px; font-weight: bold; }
+        .resultado { margin-top: 15px; padding: 15px; border-radius: 8px; background: #f8fafc; border: 1px solid #e2e8f0; }
+        .badge { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 13px; font-weight: bold; }
         .sit-1 { background: #c6f6d5; color: #22543d; }
-        .sit-mas { background: #fed7d7; color: #742a2a; }
+        .sit-2 { background: #fefcbf; color: #744210; }
+        .sit-3 { background: #feebc8; color: #7b341e; }
+        .sit-4 { background: #fed7d7; color: #742a2a; }
+        .sit-5 { background: #e2e8f0; color: #1a202c; border: 1px solid #a0aec0; }
+        .alerta-sit { font-size: 14px; font-weight: 600; margin-top: 4px; }
+        .item-deuda { background: white; border: 1px solid #edf2f7; padding: 10px; border-radius: 6px; margin-bottom: 8px; }
     </style>
 </head>
 <body>
 
 <div class="card">
-    <h2>Consulta DNI / CUIT</h2>
+    <h2>Consulta DNI / Situación BCRA</h2>
     
     <label>Contraseña de acceso:</label>
     <input type="password" id="password" placeholder="Ingresa tu clave privada">
 
     <label>Número de DNI:</label>
-    <input type="number" id="dni" placeholder="Ej: 35123456">
+    <input type="number" id="dni" placeholder="Ej: 45140633">
 
     <label>Género:</label>
     <select id="genero">
-        <option value="AMBOS">Consultar ambos (M y F)</option>
+        <option value="AMBOS">Consultar ambos (Masculino y Femenino)</option>
         <option value="M">Masculino</option>
         <option value="F">Femenino</option>
     </select>
 
-    <button onclick="consultar()">Consultar</button>
+    <button onclick="consultar()">Consultar Datos</button>
 
     <div id="output"></div>
 </div>
 
 <script>
+function getSituacionLabel(sit) {
+    switch (parseInt(sit)) {
+        case 1: return { texto: 'Normal (En regla)', clase: 'sit-1' };
+        case 2: return { texto: 'Riesgo Bajo (Atraso 31-90 días)', clase: 'sit-2' };
+        case 3: return { texto: 'Riesgo Medio (Atraso 91-180 días)', clase: 'sit-3' };
+        case 4: return { texto: 'Alto Riesgo (Atraso > 180 días)', clase: 'sit-4' };
+        case 5: return { texto: 'Irrecuperable (Incobrable)', clase: 'sit-5' };
+        default: return { texto: `Situación ${sit}`, clase: 'sit-1' };
+    }
+}
+
 async function consultar() {
     const dni = document.getElementById('dni').value.trim();
     const genero = document.getElementById('genero').value;
@@ -53,7 +69,7 @@ async function consultar() {
         return;
     }
 
-    output.innerHTML = '<p style="text-align:center; color:#718096;">Consultando...</p>';
+    output.innerHTML = '<p style="text-align:center; color:#718096; margin-top:20px;">Buscando registros en BCRA...</p>';
 
     try {
         const res = await fetch('/api/consultar', {
@@ -64,34 +80,39 @@ async function consultar() {
 
         const data = await res.json();
         if (data.error) {
-            output.innerHTML = `<p style="color:#e53e3e; font-weight:bold;">${data.error}</p>`;
+            output.innerHTML = `<p style="color:#e53e3e; font-weight:bold; margin-top:15px;">${data.error}</p>`;
             return;
         }
 
         let html = '';
         data.reportes.forEach(item => {
             html += `<div class="resultado">
-                <p><strong>Variante:</strong> ${item.genero}</p>
-                <p><strong>CUIT:</strong> <span style="font-family:monospace; font-size:16px;">${item.cuit}</span></p>`;
+                <p style="margin:4px 0;"><strong>Género:</strong> ${item.genero}</p>
+                <p style="margin:4px 0;"><strong>CUIT:</strong> <span style="font-family:monospace; font-size:16px; font-weight:bold;">${item.cuit}</span></p>
+                <p style="margin:4px 0;"><strong>Nombre completo:</strong> <span style="color:#2b6cb0; font-weight:bold;">${item.denominacion || 'No registrado aún en padrón BCRA'}</span></p>`;
 
-            if (item.datosBCRA && item.datosBCRA.deudas && item.datosBCRA.deudas.length > 0) {
-                html += `<p><strong>Nombre / Razón Social:</strong> ${item.datosBCRA.denominacion || 'N/A'}</p>`;
-                html += `<p><strong>Periodo:</strong> ${item.datosBCRA.periodo || 'N/A'}</p>`;
-                html += `<div style="margin-top:8px;"><strong>Deudas informadas:</strong></div><ul style="padding-left:20px;">`;
-                item.datosBCRA.deudas.forEach(d => {
-                    const cls = d.situacion === 1 ? 'sit-1' : 'sit-mas';
-                    html += `<li>${d.entidad}: <strong>$${d.monto} mil</strong> (<span class="badge ${cls}">Sit. ${d.situacion}</span>)</li>`;
+            if (item.registros && item.registros.length > 0) {
+                html += `<div style="margin-top:12px; margin-bottom:6px; font-weight:bold; color:#2d3748;">Entidades y Deudas Reportadas:</div>`;
+                item.registros.forEach(d => {
+                    const infoSit = getSituacionLabel(d.situacion);
+                    html += `<div class="item-deuda">
+                        <div style="font-weight:bold; color:#1a202c;">${d.entidad}</div>
+                        <div style="font-size:14px; margin: 3px 0;"><strong>Monto informado:</strong> $${d.monto} mil pesos</div>
+                        <div style="font-size:13px; color:#718096;"><strong>Período:</strong> ${d.periodo} ${d.historico ? '(Último registro histórico)' : ''}</div>
+                        <div class="alerta-sit">
+                            <strong>Situación:</strong> <span class="badge ${infoSit.clase}">Situación ${d.situacion} - ${infoSit.texto}</span>
+                        </div>
+                    </div>`;
                 });
-                html += `</ul>`;
             } else {
-                html += `<p style="color:#718096; margin: 5px 0;"><em>${item.nota || 'Sin deuda informada en el BCRA'}</em></p>`;
+                html += `<p style="color:#718096; margin-top:10px; font-size:14px;"><em>Sin deudas comerciales ni bancarias registradas en la Central de Deudores del BCRA.</em></p>`;
             }
             html += `</div>`;
         });
 
         output.innerHTML = html;
     } catch (e) {
-        output.innerHTML = '<p style="color:#e53e3e;">Error al procesar la solicitud.</p>';
+        output.innerHTML = '<p style="color:#e53e3e; margin-top:15px;">Error al procesar la solicitud.</p>';
     }
 }
 </script>
