@@ -3,62 +3,121 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Consulta DNI - ARCA & BCRA</title>
+    <title>Herramienta Integral - CUIT, Deudas y Validador de Tarjetas</title>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #eef2f7; margin: 0; padding: 15px; }
-        .card { max-width: 580px; margin: 20px auto; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
-        h2 { margin-top: 0; color: #1a202c; text-align: center; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #edf2f7; margin: 0; padding: 15px; }
+        .container { max-width: 620px; margin: 15px auto; }
+        .tabs { display: flex; gap: 8px; margin-bottom: 12px; }
+        .tab-btn { flex: 1; padding: 12px; border: none; background: #cbd5e0; color: #2d3748; font-weight: bold; font-size: 15px; border-radius: 8px 8px 0 0; cursor: pointer; }
+        .tab-btn.active { background: white; color: #2b6cb0; border-top: 3px solid #2b6cb0; }
+        .card { background: white; padding: 25px; border-radius: 0 0 10px 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.06); }
+        h2 { margin-top: 0; color: #1a202c; font-size: 20px; text-align: center; }
         label { display: block; margin-top: 15px; font-weight: 600; color: #4a5568; font-size: 14px; }
         input, select, button { width: 100%; padding: 12px; margin-top: 6px; border-radius: 6px; border: 1px solid #cbd5e0; box-sizing: border-box; font-size: 15px; }
-        button.btn-main { background: #2b6cb0; color: white; border: none; font-weight: 600; margin-top: 20px; cursor: pointer; }
-        button.btn-main:hover { background: #2c5282; }
+        .btn-submit { background: #2b6cb0; color: white; border: none; font-weight: bold; margin-top: 20px; cursor: pointer; }
+        .btn-submit:hover { background: #2c5282; }
 
-        .resultado { margin-top: 20px; padding: 18px; border-radius: 10px; background: #f8fafc; border: 1px solid #e2e8f0; }
-        .header-persona { border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; margin-bottom: 12px; }
-        .nombre { font-size: 18px; font-weight: bold; color: #1a365d; margin-top: 4px; }
-        .cuit { font-family: monospace; font-size: 16px; font-weight: bold; color: #4a5568; }
-
-        .seccion-box { background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; margin-top: 12px; }
-        .seccion-titulo { font-size: 13px; font-weight: bold; text-transform: uppercase; color: #718096; margin-bottom: 8px; }
-
-        .badge { display: inline-block; padding: 4px 10px; border-radius: 4px; font-size: 13px; font-weight: bold; }
+        /* Estilos DNI / CUIT */
+        .box-persona { margin-top: 18px; padding: 16px; border-radius: 8px; background: #f8fafc; border: 1px solid #e2e8f0; }
+        .cuit-bar { display: flex; justify-content: space-between; align-items: center; background: #edf2f7; padding: 8px 12px; border-radius: 6px; margin: 8px 0; }
+        .cuit-val { font-family: monospace; font-size: 18px; font-weight: bold; color: #2d3748; }
+        .btn-sm { padding: 6px 12px; font-size: 13px; font-weight: 600; border-radius: 4px; border: none; cursor: pointer; width: auto; margin: 0; }
+        .btn-copy { background: #4a5568; color: white; }
+        .btn-arca { background: #319795; color: white; text-decoration: none; display: inline-block; padding: 8px 12px; border-radius: 6px; font-size: 13px; font-weight: bold; margin-top: 8px; }
+        .btn-arca:hover { background: #234e52; }
+        
+        .badge { display: inline-block; padding: 3px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; }
         .sit-1 { background: #c6f6d5; color: #22543d; }
         .sit-2 { background: #fefcbf; color: #744210; }
         .sit-3 { background: #feebc8; color: #7b341e; }
         .sit-4 { background: #fed7d7; color: #742a2a; }
-        .sit-5 { background: #e2e8f0; color: #1a202c; border: 1px solid #a0aec0; }
-        
-        .arca-mono { background: #e6fffa; color: #234e52; border: 1px solid #b2f5ea; }
-        .arca-inactivo { background: #edf2f7; color: #4a5568; }
-        .arca-ri { background: #ebf8ff; color: #2b6cb0; border: 1px solid #bee3f8; }
+        .sit-5 { background: #e2e8f0; color: #1a202c; }
 
-        .item-deuda { background: #f8fafc; border: 1px solid #edf2f7; padding: 10px; border-radius: 6px; margin-top: 8px; }
+        /* Estilos Tarjetas */
+        .counter-badge { display: inline-block; float: right; font-size: 13px; color: #718096; font-weight: bold; }
+        .card-preview { margin-top: 20px; padding: 18px; border-radius: 10px; border: 1px solid #e2e8f0; background: #f7fafc; }
+        .card-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 15px; }
+        .valid { color: #38a169; font-weight: bold; }
+        .invalid { color: #e53e3e; font-weight: bold; }
     </style>
 </head>
 <body>
 
-<div class="card">
-    <h2>Consulta DNI Integral</h2>
-    
-    <label>Contraseña de acceso:</label>
-    <input type="password" id="password" placeholder="Ingresa tu clave privada">
+<div class="container">
+    <div class="tabs">
+        <button class="tab-btn active" id="tab1-btn" onclick="cambiarPestana('tab-cuit')">👤 DNI / CUIT / BCRA</button>
+        <button class="tab-btn" id="tab2-btn" onclick="cambiarPestana('tab-tarjeta')">💳 Validador de Tarjetas</button>
+    </div>
 
-    <label>Número de DNI:</label>
-    <input type="number" id="dni" placeholder="Ej: 45140633">
+    <!-- PESTAÑA 1: DNI / CUIT -->
+    <div id="tab-cuit" class="card">
+        <h2>Consulta DNI, CUIT y Situación BCRA</h2>
 
-    <label>Género a consultar:</label>
-    <select id="genero">
-        <option value="AMBOS">Consultar ambos (Masculino y Femenino)</option>
-        <option value="M">Masculino (Prefijo 20)</option>
-        <option value="F">Femenino (Prefijo 27)</option>
-    </select>
+        <label>Contraseña de acceso:</label>
+        <input type="password" id="password" placeholder="Ingresa tu clave de acceso">
 
-    <button class="btn-main" onclick="consultar()">Consultar Datos</button>
+        <label>Número de DNI:</label>
+        <input type="number" id="dni" placeholder="Ej: 45140633">
 
-    <div id="output"></div>
+        <label>Consultar por Género:</label>
+        <select id="genero">
+            <option value="AMBOS">Consultar ambos (Masculino y Femenino)</option>
+            <option value="M">Masculino (Prefijo 20)</option>
+            <option value="F">Femenino (Prefijo 27)</option>
+        </select>
+
+        <button class="btn-submit" onclick="consultarPersona()">Consultar</button>
+
+        <div id="output-persona"></div>
+    </div>
+
+    <!-- PESTAÑA 2: VALIDADOR DE TARJETAS -->
+    <div id="tab-tarjeta" class="card" style="display:none;">
+        <h2>Validador de Tarjetas (Crédito / Débito)</h2>
+
+        <label>
+            Número de Tarjeta:
+            <span id="contador-digitos" class="counter-badge">0 dígitos</span>
+        </label>
+        <input type="text" id="num-tarjeta" placeholder="Ej: 4509 1234 5678 9010" maxlength="23" oninput="analizarTarjeta()">
+
+        <div id="resultado-tarjeta" class="card-preview">
+            <div class="card-row">
+                <span><strong>Cantidad de Dígitos:</strong></span>
+                <span id="card-len">0</span>
+            </div>
+            <div class="card-row">
+                <span><strong>Red / Franquicia:</strong></span>
+                <span id="card-brand" style="font-weight:bold;">-</span>
+            </div>
+            <div class="card-row">
+                <span><strong>Tipo:</strong></span>
+                <span id="card-type">-</span>
+            </div>
+            <div class="card-row">
+                <span><strong>Banco Emisor:</strong></span>
+                <span id="card-bank" style="font-weight:bold; color:#2b6cb0;">-</span>
+            </div>
+            <div class="card-row">
+                <span><strong>País:</strong></span>
+                <span id="card-country">-</span>
+            </div>
+            <div class="card-row" style="border-top: 1px solid #e2e8f0; padding-top: 10px; margin-top: 5px;">
+                <span><strong>Algoritmo Luhn (Validez matemática):</strong></span>
+                <span id="card-luhn" style="font-weight:bold;">-</span>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
+function cambiarPestana(tabId) {
+    document.getElementById('tab-cuit').style.display = tabId === 'tab-cuit' ? 'block' : 'none';
+    document.getElementById('tab-tarjeta').style.display = tabId === 'tab-tarjeta' ? 'block' : 'none';
+    document.getElementById('tab1-btn').classList.toggle('active', tabId === 'tab-cuit');
+    document.getElementById('tab2-btn').classList.toggle('active', tabId === 'tab-tarjeta');
+}
+
 function getSituacionLabel(sit) {
     switch (parseInt(sit)) {
         case 1: return { texto: 'Situación 1 (Normal / Al día)', clase: 'sit-1' };
@@ -70,18 +129,24 @@ function getSituacionLabel(sit) {
     }
 }
 
-async function consultar() {
+function copiar(texto) {
+    navigator.clipboard.writeText(texto);
+    alert('Copiado: ' + texto);
+}
+
+// 1. Consulta DNI
+async function consultarPersona() {
     const dni = document.getElementById('dni').value.trim();
     const genero = document.getElementById('genero').value;
     const password = document.getElementById('password').value.trim();
-    const output = document.getElementById('output');
+    const out = document.getElementById('output-persona');
 
     if (!dni || !password) {
-        alert('Por favor ingresa la contraseña y el DNI.');
+        alert('Ingresa la contraseña y el DNI.');
         return;
     }
 
-    output.innerHTML = '<p style="text-align:center; color:#718096; margin-top:20px;">Consultando ARCA y Banco Central...</p>';
+    out.innerHTML = '<p style="text-align:center; color:#718096; margin-top:20px;">Consultando registros oficiales...</p>';
 
     try {
         const res = await fetch('/api/consultar', {
@@ -92,55 +157,133 @@ async function consultar() {
 
         const data = await res.json();
         if (data.error) {
-            output.innerHTML = `<p style="color:#e53e3e; font-weight:bold; margin-top:15px; text-align:center;">${data.error}</p>`;
+            out.innerHTML = `<p style="color:#e53e3e; font-weight:bold; margin-top:15px; text-align:center;">${data.error}</p>`;
             return;
         }
 
         let html = '';
         data.reportes.forEach(item => {
-            let badgeArca = 'arca-inactivo';
-            let textoArca = item.arca.tipo || 'No registra impuestos activos';
-            if (item.arca.tipo === 'Monotributo') {
-                badgeArca = 'arca-mono';
-                if (item.arca.categoria) textoArca += ` (${item.arca.categoria})`;
-            } else if (item.arca.tipo === 'Responsable Inscripto') {
-                badgeArca = 'arca-ri';
-            }
-
-            html += `<div class="resultado">
-                <div class="header-persona">
-                    <div style="font-size:12px; color:#718096; font-weight:bold; text-transform:uppercase;">Variante ${item.genero}</div>
-                    <div class="nombre">${item.nombre}</div>
-                    <div class="cuit">CUIT: ${item.cuit}</div>
+            html += `<div class="box-persona">
+                <div style="font-size:12px; font-weight:bold; color:#718096;">VARIANTE ${item.genero.toUpperCase()}</div>
+                <div class="cuit-bar">
+                    <span class="cuit-val">${item.cuit}</span>
+                    <button class="btn-sm btn-copy" onclick="copiar('${item.cuit}')">Copiar CUIT</button>
                 </div>
 
-                <div class="seccion-box">
-                    <div class="seccion-titulo">🏛️ Estado en ARCA (ex-AFIP)</div>
-                    <div><span class="badge ${badgeArca}">${textoArca}</span></div>
+                <div style="margin:8px 0;">
+                    <strong>Nombre / Denominación oficial:</strong><br>
+                    <span style="font-size:16px; font-weight:bold; color:#2b6cb0;">${item.denominacion || 'Nombre no informado en BCRA'}</span>
                 </div>
 
-                <div class="seccion-box">
-                    <div class="seccion-titulo">🏦 Situación en Banco Central (BCRA)</div>`;
+                <div style="margin-top:10px;">
+                    <a href="https://seti.afip.gob.ar/padron-puc-constancia-internet/ConsultaConstanciaAction.do" target="_blank" class="btn-arca" onclick="copiar('${item.cuit}')">
+                        🏛️ Constancia ARCA (Copia CUIT y abre web)
+                    </a>
+                </div>
+
+                <div style="margin-top:14px; font-weight:bold; color:#2d3748;">Situación Crediticia en BCRA:</div>`;
 
             if (item.bcra.registros && item.bcra.registros.length > 0) {
                 item.bcra.registros.forEach(d => {
-                    const infoSit = getSituacionLabel(d.situacion);
-                    html += `<div class="item-deuda">
+                    const sit = getSituacionLabel(d.situacion);
+                    html += `<div style="background:white; border:1px solid #e2e8f0; padding:10px; border-radius:6px; margin-top:6px;">
                         <div style="font-weight:bold; color:#1a202c;">${d.entidad}</div>
-                        <div style="font-size:13px; margin: 3px 0;">Monto informado: <strong>$${d.monto} mil</strong> | Período: ${d.periodo}</div>
-                        <div><span class="badge ${infoSit.clase}">${infoSit.texto}</span></div>
+                        <div style="font-size:13px; margin:3px 0;">Monto: <strong>$${d.monto} mil pesos</strong> | Período: ${d.periodo}</div>
+                        <div><span class="badge ${sit.clase}">${sit.texto}</span></div>
                     </div>`;
                 });
             } else {
-                html += `<p style="color:#718096; margin: 5px 0; font-size:14px;"><em>Sin deudas registradas en la Central de Deudores del BCRA.</em></p>`;
+                html += `<p style="color:#718096; font-size:13px; margin-top:5px;"><em>Sin deudas comerciales ni bancarias registradas en la Central de Deudores del BCRA.</em></p>`;
             }
 
-            html += `</div></div>`;
+            html += `</div>`;
         });
 
-        output.innerHTML = html;
+        out.innerHTML = html;
     } catch (e) {
-        output.innerHTML = '<p style="color:#e53e3e; margin-top:15px; text-align:center;">Error al comunicarse con el servidor.</p>';
+        out.innerHTML = '<p style="color:#e53e3e; text-align:center;">Error al comunicarse con el servidor.</p>';
+    }
+}
+
+// 2. Validador de Tarjetas y Algoritmo de Luhn
+function luhnCheck(numStr) {
+    let sum = 0;
+    let shouldDouble = false;
+    for (let i = numStr.length - 1; i >= 0; i--) {
+        let digit = parseInt(numStr.charAt(i));
+        if (shouldDouble) {
+            digit *= 2;
+            if (digit > 9) digit -= 9;
+        }
+        sum += digit;
+        shouldDouble = !shouldDouble;
+    }
+    return (sum % 10) === 0;
+}
+
+function identificarMarca(num) {
+    if (/^4/.test(num)) return 'VISA';
+    if (/^(5[1-5]|2[2-7])/.test(num)) return 'Mastercard';
+    if (/^3[47]/.test(num)) return 'American Express';
+    if (/^(5896|6042|6043)/.test(num)) return 'Cabal';
+    if (/^(6011|65|64[4-9]|622)/.test(num)) return 'Discover';
+    if (/^(5018|5020|5038|5893|6304|6759|6761|6763)/.test(num)) return 'Maestro';
+    if (/^35/.test(num)) return 'JCB';
+    if (/^3(0[0-5]|[68])/.test(num)) return 'Diners Club';
+    if (/^50/.test(num)) return 'Naranja / Cabal';
+    return 'Desconocida';
+}
+
+let timeoutBin = null;
+async function analizarTarjeta() {
+    const raw = document.getElementById('num-tarjeta').value;
+    const clean = raw.replace(/\D/g, '');
+
+    document.getElementById('contador-digitos').innerText = `${clean.length} dígitos`;
+    document.getElementById('card-len').innerText = clean.length;
+
+    if (clean.length === 0) {
+        document.getElementById('card-brand').innerText = '-';
+        document.getElementById('card-type').innerText = '-';
+        document.getElementById('card-bank').innerText = '-';
+        document.getElementById('card-country').innerText = '-';
+        document.getElementById('card-luhn').innerText = '-';
+        return;
+    }
+
+    // Marca
+    const brand = identificarMarca(clean);
+    document.getElementById('card-brand').innerText = brand;
+
+    // Validación matemática Luhn
+    if (clean.length >= 13) {
+        const isValid = luhnCheck(clean);
+        document.getElementById('card-luhn').innerHTML = isValid 
+            ? '<span class="valid">✅ VÁLIDA (Estructura Correcta)</span>' 
+            : '<span class="invalid">❌ INVÁLIDA (Dígito verificador incorrecto)</span>';
+    } else {
+        document.getElementById('card-luhn').innerText = 'Incompleta...';
+    }
+
+    // Búsqueda de Banco por BIN (primeros 6 a 8 dígitos)
+    if (clean.length >= 6) {
+        clearTimeout(timeoutBin);
+        timeoutBin = setTimeout(async () => {
+            const bin = clean.substring(0, 8);
+            try {
+                const res = await fetch(`/api/bin/${bin}`);
+                const data = await res.json();
+                if (data.valido) {
+                    document.getElementById('card-bank').innerText = data.banco;
+                    document.getElementById('card-type').innerText = data.tipo;
+                    document.getElementById('card-country').innerText = data.pais;
+                } else {
+                    document.getElementById('card-bank').innerText = 'Banco no encontrado en base internacional';
+                }
+            } catch (e) {
+                document.getElementById('card-bank').innerText = 'Error al consultar banco';
+            }
+        }, 500);
     }
 }
 </script>
