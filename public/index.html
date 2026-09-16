@@ -21,7 +21,6 @@
         .btn-copy { background: #4a5568; color: white; }
         .btn-arca { background: #319795; color: white; text-decoration: none; display: inline-block; padding: 8px 12px; border-radius: 6px; font-size: 13px; font-weight: bold; margin-top: 8px; }
         
-        /* Badges BCRA */
         .badge { display: inline-block; padding: 3px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; }
         .sit-1 { background: #c6f6d5; color: #22543d; }
         .sit-2 { background: #fefcbf; color: #744210; }
@@ -32,6 +31,11 @@
         .counter-badge { float: right; font-size: 13px; color: #718096; font-weight: bold; }
         .card-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 14px; }
         .box-result { margin-top: 15px; padding: 14px; border-radius: 8px; background: #f8fafc; border: 1px solid #e2e8f0; }
+
+        /* Estilos No Llame */
+        .alerta-nollame-rojo { background: #fff5f5; border: 2px solid #e53e3e; color: #9b2c2c; padding: 16px; border-radius: 8px; font-weight: bold; text-align: center; }
+        .alerta-nollame-verde { background: #f0fff4; border: 2px solid #38a169; color: #22543d; padding: 16px; border-radius: 8px; font-weight: bold; text-align: center; }
+        .alerta-nollame-gris { background: #edf2f7; border: 2px solid #cbd5e0; color: #4a5568; padding: 16px; border-radius: 8px; text-align: center; }
     </style>
 </head>
 <body>
@@ -80,13 +84,9 @@
         <label>Número de Teléfono (con código de área sin 0 ni 15):</label>
         <input type="number" id="tel-input" placeholder="Ej: 2615123456">
 
-        <button class="btn-submit" onclick="abrirNoLlame()">Consultar en Registro No Llame</button>
+        <button class="btn-submit" onclick="consultarNoLlameEnPantalla()">Consultar Estado en Pantalla</button>
 
-        <div class="box-result" style="margin-top:20px;">
-            <p style="margin:0; font-size:14px; color:#4a5568;">
-                Presiona el botón para copiar el número al portapapeles y abrir directo la plataforma de <strong>No Llame Damatec</strong> y <strong>No Llame Nacional</strong> para pegar y validar en un instante.
-            </p>
-        </div>
+        <div id="out-nollame" style="margin-top:18px;"></div>
     </div>
 
     <!-- 4. VALIDADOR DE TARJETAS -->
@@ -136,7 +136,7 @@ function getSituacionLabel(sit) {
     }
 }
 
-// 1. DNI / CUIT / BCRA
+// 1. DNI
 async function consultarPersona() {
     const dni = document.getElementById('dni').value.trim();
     const genero = document.getElementById('genero').value;
@@ -212,7 +212,7 @@ async function buscarCoordenadas() {
                 </div>
                 <div style="display:flex; gap:8px;">
                     <button class="btn-sm btn-copy" onclick="copiar('${coords}')">Copiar Coordenadas</button>
-                    <a href="${r.mapsUrl}" target="_blank" style="background:#2b6cb0; color:white; padding:6px 12px; font-size:12px; text-decoration:none; border-radius:4px; font-weight:bold;">Ver en Google Maps</a>
+                    <a href="${r.mapsUrl}" target="_blank" style="background:#2b6cb0; color:white; padding:6px 12px; font-size:12px; text-decoration:none; border-radius:4px; font-weight:bold;">Ver en Maps</a>
                 </div>
             </div>`;
         });
@@ -222,12 +222,43 @@ async function buscarCoordenadas() {
     }
 }
 
-// 3. No Llame
-function abrirNoLlame() {
+// 3. Consulta No Llame en pantalla
+async function consultarNoLlameEnPantalla() {
     const tel = document.getElementById('tel-input').value.trim();
-    if (!tel) return alert('Ingresa un número telefónico.');
-    copiar(tel);
-    window.open('https://nollame.damatec.com.ar/', '_blank');
+    const out = document.getElementById('out-nollame');
+    if (!tel) return alert('Ingresa un número de teléfono.');
+
+    out.innerHTML = '<p style="text-align:center; color:#718096;">Verificando en base de datos No Llame...</p>';
+
+    try {
+        const res = await fetch(`/api/nollame/${tel}`);
+        const data = await res.json();
+
+        if (data.indeterminado) {
+            out.innerHTML = `<div class="alerta-nollame-gris">
+                <div style="font-size:16px; font-weight:bold; margin-bottom:5px;">⚠️ Servicio momentáneamente saturado</div>
+                <div style="font-size:14px; margin-bottom:12px;">${data.detalle}</div>
+                <button class="btn-sm" style="background:#2b6cb0; color:white;" onclick="window.open('https://nollame.damatec.com.ar/','_blank')">Consultar en Damatec Directo</button>
+            </div>`;
+            return;
+        }
+
+        if (data.inscripto) {
+            out.innerHTML = `<div class="alerta-nollame-rojo">
+                <div style="font-size:18px;">🚫 ESTÁ REGISTRADO EN NO LLAME</div>
+                <div style="font-size:14px; margin-top:6px;">Línea: <strong>${data.numero}</strong></div>
+                <div style="font-size:13px; margin-top:4px;">No llamar / No contactar comercialmente.</div>
+            </div>`;
+        } else {
+            out.innerHTML = `<div class="alerta-nollame-verde">
+                <div style="font-size:18px;">✅ LÍNEA LIBRE (NO REGISTRADO)</div>
+                <div style="font-size:14px; margin-top:6px;">Línea: <strong>${data.numero}</strong></div>
+                <div style="font-size:13px; margin-top:4px;">Apto para contacto comercial y ventas.</div>
+            </div>`;
+        }
+    } catch (e) {
+        out.innerHTML = `<p style="color:#e53e3e; text-align:center;">Error al conectar con el servicio No Llame.</p>`;
+    }
 }
 
 // 4. Tarjetas
