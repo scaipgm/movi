@@ -5,23 +5,128 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel de Gestión Integral</title>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #edf2f7; margin: 0; padding: 12px; }
-        .container { max-width: 650px; margin: 10px auto; }
+        :root {
+            --bg-body: #edf2f7;
+            --bg-card: #ffffff;
+            --text-main: #1a202c;
+            --text-label: #4a5568;
+            --text-muted: #718096;
+            --border-color: #cbd5e0;
+            --tab-inactive: #cbd5e0;
+            --tab-inactive-text: #2d3748;
+            --box-bg: #f8fafc;
+            --item-bg: #ffffff;
+            --primary: #2b6cb0;
+            --primary-hover: #2c5282;
+            --shadow: rgba(0,0,0,0.08);
+        }
+
+        body.dark-mode {
+            --bg-body: #0f172a;
+            --bg-card: #1e293b;
+            --text-main: #f8fafc;
+            --text-label: #cbd5e1;
+            --text-muted: #94a3b8;
+            --border-color: #334155;
+            --tab-inactive: #334155;
+            --tab-inactive-text: #94a3b8;
+            --box-bg: #0f172a;
+            --item-bg: #1e293b;
+            --primary: #3b82f6;
+            --primary-hover: #1d4ed8;
+            --shadow: rgba(0,0,0,0.4);
+        }
+
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+            background: var(--bg-body); 
+            color: var(--text-main);
+            margin: 0; 
+            padding: 12px; 
+            transition: background 0.2s ease, color 0.2s ease;
+        }
+
+        .container { max-width: 650px; margin: 10px auto; position: relative; }
+
+        /* Barra superior con botón de Modo Oscuro */
+        .top-bar {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 8px;
+        }
+
+        .btn-theme {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 2px 5px var(--shadow);
+            width: auto;
+            margin: 0;
+        }
+
         .tabs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin-bottom: 8px; }
-        .tab-btn { padding: 10px 4px; border: none; background: #cbd5e0; color: #2d3748; font-weight: bold; font-size: 13px; border-radius: 6px 6px 0 0; cursor: pointer; text-align: center; }
-        .tab-btn.active { background: white; color: #2b6cb0; border-top: 3px solid #2b6cb0; }
-        .card { background: white; padding: 22px; border-radius: 0 0 10px 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.06); }
-        h2 { margin-top: 0; color: #1a202c; font-size: 19px; text-align: center; }
-        label { display: block; margin-top: 14px; font-weight: 600; color: #4a5568; font-size: 13px; }
-        input, select, button { width: 100%; padding: 11px; margin-top: 5px; border-radius: 6px; border: 1px solid #cbd5e0; box-sizing: border-box; font-size: 15px; }
-        .btn-submit { background: #2b6cb0; color: white; border: none; font-weight: bold; margin-top: 18px; cursor: pointer; }
-        .btn-submit:hover { background: #2c5282; }
+        .tab-btn { 
+            padding: 10px 4px; 
+            border: none; 
+            background: var(--tab-inactive); 
+            color: var(--tab-inactive-text); 
+            font-weight: bold; 
+            font-size: 13px; 
+            border-radius: 6px 6px 0 0; 
+            cursor: pointer; 
+            text-align: center; 
+        }
+        .tab-btn.active { 
+            background: var(--bg-card); 
+            color: var(--primary); 
+            border-top: 3px solid var(--primary); 
+        }
+
+        .card { 
+            background: var(--bg-card); 
+            padding: 22px; 
+            border-radius: 0 0 10px 10px; 
+            box-shadow: 0 4px 15px var(--shadow); 
+        }
+
+        h2 { margin-top: 0; color: var(--text-main); font-size: 19px; text-align: center; }
+        label { display: block; margin-top: 14px; font-weight: 600; color: var(--text-label); font-size: 13px; }
+
+        input, select, button { 
+            width: 100%; 
+            padding: 11px; 
+            margin-top: 5px; 
+            border-radius: 6px; 
+            border: 1px solid var(--border-color); 
+            background: var(--bg-card);
+            color: var(--text-main);
+            box-sizing: border-box; 
+            font-size: 15px; 
+        }
+
+        .btn-submit { 
+            background: var(--primary); 
+            color: white; 
+            border: none; 
+            font-weight: bold; 
+            margin-top: 18px; 
+            cursor: pointer; 
+        }
+        .btn-submit:hover { background: var(--primary-hover); }
 
         .btn-sm { padding: 8px 14px; font-size: 12px; font-weight: bold; border-radius: 4px; border: none; cursor: pointer; width: auto; margin: 0; }
-        .btn-copy { background: #4a5568; color: white; }
-        .btn-copy:hover { background: #2d3748; }
-        .btn-arca { background: #319795; color: white; text-decoration: none; display: inline-block; padding: 8px 12px; border-radius: 6px; font-size: 13px; font-weight: bold; margin-top: 8px; }
-        .btn-arca:hover { background: #285e61; }
+        .btn-copy { background: #475569; color: white; }
+        .btn-copy:hover { background: #334155; }
+        .btn-arca { background: #0d9488; color: white; text-decoration: none; display: inline-block; padding: 8px 12px; border-radius: 6px; font-size: 13px; font-weight: bold; margin-top: 8px; }
+        .btn-arca:hover { background: #0f766e; }
 
         /* Badges BCRA */
         .badge { display: inline-block; padding: 3px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; }
@@ -31,14 +136,18 @@
         .sit-4 { background: #fed7d7; color: #742a2a; }
         .sit-5 { background: #e2e8f0; color: #1a202c; }
 
-        .counter-badge { float: right; font-size: 13px; color: #718096; font-weight: bold; }
+        .counter-badge { float: right; font-size: 13px; color: var(--text-muted); font-weight: bold; }
         .card-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 14px; }
-        .box-result { margin-top: 15px; padding: 14px; border-radius: 8px; background: #f8fafc; border: 1px solid #e2e8f0; }
+        .box-result { margin-top: 15px; padding: 14px; border-radius: 8px; background: var(--box-bg); border: 1px solid var(--border-color); }
     </style>
 </head>
 <body>
 
 <div class="container">
+    <div class="top-bar">
+        <button class="btn-theme" onclick="toggleTheme()" id="theme-toggle">🌙 Modo Oscuro</button>
+    </div>
+
     <div class="tabs">
         <button class="tab-btn active" id="btn-t1" onclick="verTab('tab-cuit')">👤 DNI / BCRA</button>
         <button class="tab-btn" id="btn-t2" onclick="verTab('tab-geo')">📍 Coordenadas</button>
@@ -76,21 +185,9 @@
         <div id="out-geo"></div>
     </div>
 
-    <!-- 3. REGISTRO NO LLAME -->
-    <div id="tab-nollame" class="card" style="display:none;">
-        <h2>Verificar Registro No Llame</h2>
-        <label>Número de Teléfono:</label>
-        <div style="display: flex; gap: 8px; margin-top: 5px;">
-            <input type="number" id="tel-input" placeholder="Ej: 2213577122" style="margin-top:0;">
-            <button class="btn-sm btn-copy" onclick="copiarTel()">Copiar Número</button>
-        </div>
-
-        <p style="font-size: 13px; color: #718096; margin: 12px 0 6px 0;">
-            💡 Toca <strong>Copiar Número</strong>, haz clic en la casilla del cuadro de abajo, presiona <strong>Pegar (Ctrl + V)</strong> y dale a <strong>Consultar</strong> sin salir de esta pantalla:
-        </p>
-
-        <!-- Ventana de Damatec integrada directamente en la pantalla -->
-        <div style="width: 100%; height: 380px; border-radius: 8px; overflow: hidden; border: 1px solid #cbd5e0; margin-top: 8px; background: white;">
+    <!-- 3. REGISTRO NO LLAME (Limpio y directo) -->
+    <div id="tab-nollame" class="card" style="display:none; padding: 12px;">
+        <div style="width: 100%; height: 500px; border-radius: 8px; overflow: hidden; border: 1px solid var(--border-color); background: white;">
             <iframe id="frame-nollame" src="https://nollame.damatec.com.ar/" style="width: 100%; height: 100%; border: none;"></iframe>
         </div>
     </div>
@@ -105,9 +202,9 @@
             <div class="card-row"><span><strong>Cantidad de Dígitos:</strong></span><span id="card-len">0</span></div>
             <div class="card-row"><span><strong>Red / Franquicia:</strong></span><span id="card-brand" style="font-weight:bold;">-</span></div>
             <div class="card-row"><span><strong>Tipo:</strong></span><span id="card-type">-</span></div>
-            <div class="card-row"><span><strong>Banco Emisor:</strong></span><span id="card-bank" style="font-weight:bold; color:#2b6cb0;">-</span></div>
+            <div class="card-row"><span><strong>Banco Emisor:</strong></span><span id="card-bank" style="font-weight:bold; color:var(--primary);">-</span></div>
             <div class="card-row"><span><strong>País:</strong></span><span id="card-country">-</span></div>
-            <div class="card-row" style="border-top:1px solid #e2e8f0; padding-top:8px;">
+            <div class="card-row" style="border-top:1px solid var(--border-color); padding-top:8px;">
                 <span><strong>Validación Luhn (Dígito verificador):</strong></span><span id="card-luhn" style="font-weight:bold;">-</span>
             </div>
         </div>
@@ -115,6 +212,26 @@
 </div>
 
 <script>
+// Manejo de Modo Oscuro
+function toggleTheme() {
+    const body = document.body;
+    const isDark = body.classList.toggle('dark-mode');
+    const btn = document.getElementById('theme-toggle');
+    if (isDark) {
+        btn.innerHTML = '☀️ Modo Claro';
+        localStorage.setItem('theme', 'dark');
+    } else {
+        btn.innerHTML = '🌙 Modo Oscuro';
+        localStorage.setItem('theme', 'light');
+    }
+}
+
+// Cargar preferencia guardada
+if (localStorage.getItem('theme') === 'dark') {
+    document.body.classList.add('dark-mode');
+    document.getElementById('theme-toggle').innerHTML = '☀️ Modo Claro';
+}
+
 function verTab(id) {
     ['tab-cuit', 'tab-geo', 'tab-nollame', 'tab-tarjeta'].forEach(t => document.getElementById(t).style.display = 'none');
     ['btn-t1', 'btn-t2', 'btn-t3', 'btn-t4'].forEach(b => document.getElementById(b).classList.remove('active'));
@@ -131,13 +248,6 @@ function copiar(t) {
     alert('Copiado: ' + t);
 }
 
-function copiarTel() {
-    const tel = document.getElementById('tel-input').value.trim();
-    if (!tel) return alert('Por favor ingresa un número primero.');
-    navigator.clipboard.writeText(tel);
-    alert('Número ' + tel + ' copiado al portapapeles. Pégalo en el recuadro de abajo y toca Consultar.');
-}
-
 function getSituacionLabel(sit) {
     switch (parseInt(sit)) {
         case 1: return { texto: 'Situación 1 (Normal / Al día)', clase: 'sit-1' };
@@ -149,7 +259,7 @@ function getSituacionLabel(sit) {
     }
 }
 
-// 1. Consulta DNI / CUIT / BCRA
+// 1. DNI
 async function consultarPersona() {
     const dni = document.getElementById('dni').value.trim();
     const genero = document.getElementById('genero').value;
@@ -157,7 +267,7 @@ async function consultarPersona() {
     const out = document.getElementById('out-persona');
 
     if (!dni || !password) return alert('Ingresa la contraseña y el DNI.');
-    out.innerHTML = '<p style="text-align:center; color:#718096; margin-top:15px;">Consultando BCRA...</p>';
+    out.innerHTML = '<p style="text-align:center; color:var(--text-muted); margin-top:15px;">Consultando BCRA...</p>';
 
     try {
         const res = await fetch('/api/consultar', {
@@ -171,12 +281,12 @@ async function consultarPersona() {
         let html = '';
         data.reportes.forEach(item => {
             html += `<div class="box-result">
-                <div style="font-size:12px; font-weight:bold; color:#718096;">VARIANTE ${item.genero.toUpperCase()}</div>
-                <div style="display:flex; justify-content:space-between; align-items:center; background:#edf2f7; padding:6px 10px; border-radius:6px; margin:6px 0;">
+                <div style="font-size:12px; font-weight:bold; color:var(--text-muted);">VARIANTE ${item.genero.toUpperCase()}</div>
+                <div style="display:flex; justify-content:space-between; align-items:center; background:var(--bg-body); padding:6px 10px; border-radius:6px; margin:6px 0; border:1px solid var(--border-color);">
                     <span style="font-family:monospace; font-size:17px; font-weight:bold;">${item.cuit}</span>
                     <button class="btn-sm btn-copy" onclick="copiar('${item.cuit}')">Copiar CUIT</button>
                 </div>
-                <div><strong>Nombre / Razón Social:</strong> <span style="color:#2b6cb0; font-weight:bold;">${item.denominacion || 'No registrado en BCRA'}</span></div>
+                <div style="margin: 8px 0;"><strong>Nombre / Razón Social:</strong> <span style="color:var(--primary); font-weight:bold;">${item.denominacion || 'No registrado en BCRA'}</span></div>
                 <a href="https://seti.afip.gob.ar/padron-puc-constancia-internet/ConsultaConstanciaAction.do" target="_blank" class="btn-arca" onclick="copiar('${item.cuit}')">
                     🏛️ Abrir Constancia ARCA (Copia CUIT)
                 </a>
@@ -185,14 +295,14 @@ async function consultarPersona() {
             if (item.bcra.registros && item.bcra.registros.length > 0) {
                 item.bcra.registros.forEach(d => {
                     const sit = getSituacionLabel(d.situacion);
-                    html += `<div style="background:white; border:1px solid #e2e8f0; padding:8px; border-radius:6px; margin-top:6px;">
+                    html += `<div style="background:var(--item-bg); border:1px solid var(--border-color); padding:8px; border-radius:6px; margin-top:6px;">
                         <div style="font-weight:bold;">${d.entidad}</div>
-                        <div style="font-size:13px;">Monto: $${d.monto} mil | Período: ${d.periodo}</div>
+                        <div style="font-size:13px; margin: 2px 0;">Monto: $${d.monto} mil | Período: ${d.periodo}</div>
                         <div><span class="badge ${sit.clase}">${sit.texto}</span></div>
                     </div>`;
                 });
             } else {
-                html += `<p style="color:#718096; font-size:13px; margin:4px 0;">Sin deudas en BCRA.</p>`;
+                html += `<p style="color:var(--text-muted); font-size:13px; margin:4px 0;">Sin deudas en BCRA.</p>`;
             }
             html += `</div>`;
         });
@@ -208,7 +318,7 @@ async function buscarCoordenadas() {
     const out = document.getElementById('out-geo');
     if (!dir) return alert('Ingresa una dirección.');
 
-    out.innerHTML = '<p style="text-align:center; color:#718096;">Buscando coordenadas satelitales...</p>';
+    out.innerHTML = '<p style="text-align:center; color:var(--text-muted);">Buscando coordenadas satelitales...</p>';
 
     try {
         const res = await fetch(`/api/geocode?direccion=${encodeURIComponent(dir)}`);
@@ -219,13 +329,13 @@ async function buscarCoordenadas() {
         data.resultados.forEach((r, idx) => {
             const coords = `${r.lat}, ${r.lon}`;
             html += `<div class="box-result">
-                <div style="font-weight:bold; color:#1a202c;">Opción ${idx + 1}: ${r.nombre}</div>
-                <div style="margin:8px 0; font-family:monospace; font-size:16px; color:#2b6cb0; font-weight:bold;">
+                <div style="font-weight:bold; color:var(--text-main);">Opción ${idx + 1}: ${r.nombre}</div>
+                <div style="margin:8px 0; font-family:monospace; font-size:16px; color:var(--primary); font-weight:bold;">
                     📍 ${coords}
                 </div>
                 <div style="display:flex; gap:8px;">
                     <button class="btn-sm btn-copy" onclick="copiar('${coords}')">Copiar Coordenadas</button>
-                    <a href="${r.mapsUrl}" target="_blank" style="background:#2b6cb0; color:white; padding:6px 12px; font-size:12px; text-decoration:none; border-radius:4px; font-weight:bold;">Ver en Maps</a>
+                    <a href="${r.mapsUrl}" target="_blank" style="background:var(--primary); color:white; padding:6px 12px; font-size:12px; text-decoration:none; border-radius:4px; font-weight:bold;">Ver en Maps</a>
                 </div>
             </div>`;
         });
