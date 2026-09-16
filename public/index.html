@@ -17,10 +17,13 @@
         .btn-submit { background: #2b6cb0; color: white; border: none; font-weight: bold; margin-top: 18px; cursor: pointer; }
         .btn-submit:hover { background: #2c5282; }
 
-        .btn-sm { padding: 6px 12px; font-size: 12px; font-weight: bold; border-radius: 4px; border: none; cursor: pointer; width: auto; margin: 0; }
+        .btn-sm { padding: 8px 14px; font-size: 12px; font-weight: bold; border-radius: 4px; border: none; cursor: pointer; width: auto; margin: 0; }
         .btn-copy { background: #4a5568; color: white; }
+        .btn-copy:hover { background: #2d3748; }
         .btn-arca { background: #319795; color: white; text-decoration: none; display: inline-block; padding: 8px 12px; border-radius: 6px; font-size: 13px; font-weight: bold; margin-top: 8px; }
-        
+        .btn-arca:hover { background: #285e61; }
+
+        /* Badges BCRA */
         .badge { display: inline-block; padding: 3px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; }
         .sit-1 { background: #c6f6d5; color: #22543d; }
         .sit-2 { background: #fefcbf; color: #744210; }
@@ -31,11 +34,6 @@
         .counter-badge { float: right; font-size: 13px; color: #718096; font-weight: bold; }
         .card-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 14px; }
         .box-result { margin-top: 15px; padding: 14px; border-radius: 8px; background: #f8fafc; border: 1px solid #e2e8f0; }
-
-        /* Estilos No Llame */
-        .alerta-nollame-rojo { background: #fff5f5; border: 2px solid #e53e3e; color: #9b2c2c; padding: 16px; border-radius: 8px; font-weight: bold; text-align: center; }
-        .alerta-nollame-verde { background: #f0fff4; border: 2px solid #38a169; color: #22543d; padding: 16px; border-radius: 8px; font-weight: bold; text-align: center; }
-        .alerta-nollame-gris { background: #edf2f7; border: 2px solid #cbd5e0; color: #4a5568; padding: 16px; border-radius: 8px; text-align: center; }
     </style>
 </head>
 <body>
@@ -57,7 +55,7 @@
         <label>Número de DNI:</label>
         <input type="number" id="dni" placeholder="Ej: 45140633">
 
-        <label>Género:</label>
+        <label>Género a consultar:</label>
         <select id="genero">
             <option value="AMBOS">Consultar ambos (M y F)</option>
             <option value="M">Masculino (Prefijo 20)</option>
@@ -81,12 +79,20 @@
     <!-- 3. REGISTRO NO LLAME -->
     <div id="tab-nollame" class="card" style="display:none;">
         <h2>Verificar Registro No Llame</h2>
-        <label>Número de Teléfono (con código de área sin 0 ni 15):</label>
-        <input type="number" id="tel-input" placeholder="Ej: 2615123456">
+        <label>Número de Teléfono:</label>
+        <div style="display: flex; gap: 8px; margin-top: 5px;">
+            <input type="number" id="tel-input" placeholder="Ej: 2213577122" style="margin-top:0;">
+            <button class="btn-sm btn-copy" onclick="copiarTel()">Copiar Número</button>
+        </div>
 
-        <button class="btn-submit" onclick="consultarNoLlameEnPantalla()">Consultar Estado en Pantalla</button>
+        <p style="font-size: 13px; color: #718096; margin: 12px 0 6px 0;">
+            💡 Toca <strong>Copiar Número</strong>, haz clic en la casilla del cuadro de abajo, presiona <strong>Pegar (Ctrl + V)</strong> y dale a <strong>Consultar</strong> sin salir de esta pantalla:
+        </p>
 
-        <div id="out-nollame" style="margin-top:18px;"></div>
+        <!-- Ventana de Damatec integrada directamente en la pantalla -->
+        <div style="width: 100%; height: 380px; border-radius: 8px; overflow: hidden; border: 1px solid #cbd5e0; margin-top: 8px; background: white;">
+            <iframe id="frame-nollame" src="https://nollame.damatec.com.ar/" style="width: 100%; height: 100%; border: none;"></iframe>
+        </div>
     </div>
 
     <!-- 4. VALIDADOR DE TARJETAS -->
@@ -102,7 +108,7 @@
             <div class="card-row"><span><strong>Banco Emisor:</strong></span><span id="card-bank" style="font-weight:bold; color:#2b6cb0;">-</span></div>
             <div class="card-row"><span><strong>País:</strong></span><span id="card-country">-</span></div>
             <div class="card-row" style="border-top:1px solid #e2e8f0; padding-top:8px;">
-                <span><strong>Validación Luhn:</strong></span><span id="card-luhn" style="font-weight:bold;">-</span>
+                <span><strong>Validación Luhn (Dígito verificador):</strong></span><span id="card-luhn" style="font-weight:bold;">-</span>
             </div>
         </div>
     </div>
@@ -125,6 +131,13 @@ function copiar(t) {
     alert('Copiado: ' + t);
 }
 
+function copiarTel() {
+    const tel = document.getElementById('tel-input').value.trim();
+    if (!tel) return alert('Por favor ingresa un número primero.');
+    navigator.clipboard.writeText(tel);
+    alert('Número ' + tel + ' copiado al portapapeles. Pégalo en el recuadro de abajo y toca Consultar.');
+}
+
 function getSituacionLabel(sit) {
     switch (parseInt(sit)) {
         case 1: return { texto: 'Situación 1 (Normal / Al día)', clase: 'sit-1' };
@@ -136,14 +149,14 @@ function getSituacionLabel(sit) {
     }
 }
 
-// 1. DNI
+// 1. Consulta DNI / CUIT / BCRA
 async function consultarPersona() {
     const dni = document.getElementById('dni').value.trim();
     const genero = document.getElementById('genero').value;
     const password = document.getElementById('password').value.trim();
     const out = document.getElementById('out-persona');
 
-    if (!dni || !password) return alert('Ingresa contraseña y DNI.');
+    if (!dni || !password) return alert('Ingresa la contraseña y el DNI.');
     out.innerHTML = '<p style="text-align:center; color:#718096; margin-top:15px;">Consultando BCRA...</p>';
 
     try {
@@ -222,46 +235,7 @@ async function buscarCoordenadas() {
     }
 }
 
-// 3. Consulta No Llame en pantalla
-async function consultarNoLlameEnPantalla() {
-    const tel = document.getElementById('tel-input').value.trim();
-    const out = document.getElementById('out-nollame');
-    if (!tel) return alert('Ingresa un número de teléfono.');
-
-    out.innerHTML = '<p style="text-align:center; color:#718096;">Verificando en base de datos No Llame...</p>';
-
-    try {
-        const res = await fetch(`/api/nollame/${tel}`);
-        const data = await res.json();
-
-        if (data.indeterminado) {
-            out.innerHTML = `<div class="alerta-nollame-gris">
-                <div style="font-size:16px; font-weight:bold; margin-bottom:5px;">⚠️ Servicio momentáneamente saturado</div>
-                <div style="font-size:14px; margin-bottom:12px;">${data.detalle}</div>
-                <button class="btn-sm" style="background:#2b6cb0; color:white;" onclick="window.open('https://nollame.damatec.com.ar/','_blank')">Consultar en Damatec Directo</button>
-            </div>`;
-            return;
-        }
-
-        if (data.inscripto) {
-            out.innerHTML = `<div class="alerta-nollame-rojo">
-                <div style="font-size:18px;">🚫 ESTÁ REGISTRADO EN NO LLAME</div>
-                <div style="font-size:14px; margin-top:6px;">Línea: <strong>${data.numero}</strong></div>
-                <div style="font-size:13px; margin-top:4px;">No llamar / No contactar comercialmente.</div>
-            </div>`;
-        } else {
-            out.innerHTML = `<div class="alerta-nollame-verde">
-                <div style="font-size:18px;">✅ LÍNEA LIBRE (NO REGISTRADO)</div>
-                <div style="font-size:14px; margin-top:6px;">Línea: <strong>${data.numero}</strong></div>
-                <div style="font-size:13px; margin-top:4px;">Apto para contacto comercial y ventas.</div>
-            </div>`;
-        }
-    } catch (e) {
-        out.innerHTML = `<p style="color:#e53e3e; text-align:center;">Error al conectar con el servicio No Llame.</p>`;
-    }
-}
-
-// 4. Tarjetas
+// 3. Tarjetas
 function luhnCheck(num) {
     let sum = 0, alt = false;
     for (let i = num.length - 1; i >= 0; i--) {
@@ -291,8 +265,8 @@ function analizarTarjeta() {
 
     if (clean.length >= 13) {
         document.getElementById('card-luhn').innerHTML = luhnCheck(clean) 
-            ? '<span style="color:#38a169;">✅ VÁLIDA</span>' 
-            : '<span style="color:#e53e3e;">❌ INVÁLIDA</span>';
+            ? '<span style="color:#38a169; font-weight:bold;">✅ VÁLIDA</span>' 
+            : '<span style="color:#e53e3e; font-weight:bold;">❌ INVÁLIDA</span>';
     }
 
     if (clean.length >= 6) {
