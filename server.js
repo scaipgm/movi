@@ -6,9 +6,10 @@ const app = express();
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Clave de acceso establecida
 const CLAVE_SECRETA = process.env.APP_PASSWORD || "tarde";
 
-// 1. CUIT / CUIL (Módulo 11)
+// 1. Algoritmo oficial de CUIT / CUIL (Módulo 11)
 function calcularCUIT(dni, genero) {
     const dniStr = dni.toString().padStart(8, '0');
     let prefijo = genero === 'M' ? '20' : (genero === 'F' ? '27' : '20');
@@ -32,11 +33,12 @@ function calcularCUIT(dni, genero) {
     return `${prefijo}${dniStr}${digito}`;
 }
 
-// 2. BCRA
+// 2. Consulta Central de Deudores del BCRA
 async function consultarBCRA(cuit) {
     let denominacion = null;
     let registros = [];
 
+    // Consulta deudas del período actual
     try {
         const res = await axios.get(`https://api.bcra.gob.ar/centraldedeudores/v1.0/Deudas/${cuit}`, {
             headers: { 'Accept': 'application/json' },
@@ -60,6 +62,7 @@ async function consultarBCRA(cuit) {
         }
     } catch (e) {}
 
+    // Si no trajo nombre o deudas vigentes, revisa historial de los últimos 24 meses
     if (registros.length === 0 || !denominacion) {
         try {
             const resHist = await axios.get(`https://api.bcra.gob.ar/centraldedeudores/v1.0/Deudas/Historicas/${cuit}`, {
@@ -90,11 +93,15 @@ async function consultarBCRA(cuit) {
     return { denominacion, registros };
 }
 
-// Endpoint Persona
+// Endpoint de Consulta de Persona
 app.post('/api/consultar', async (req, res) => {
     const { dni, genero, password } = req.body;
-    if (password !== CLAVE_SECRETA) return res.status(401).json({ error: 'Contraseña incorrecta.' });
-    if (!dni || isNaN(dni)) return res.status(400).json({ error: 'DNI inválido.' });
+    if (password !== CLAVE_SECRETA) {
+        return res.status(401).json({ error: 'Contraseña de acceso incorrecta.' });
+    }
+    if (!dni || isNaN(dni)) {
+        return res.status(400).json({ error: 'DNI inválido.' });
+    }
 
     let cuits = [];
     if (genero === 'M' || genero === 'F') {
@@ -117,7 +124,7 @@ app.post('/api/consultar', async (req, res) => {
     res.json({ dni, reportes });
 });
 
-// Endpoint Tarjetas BIN
+// Endpoint Validador de BIN de Tarjetas (identifica banco)
 app.get('/api/bin/:bin', async (req, res) => {
     try {
         const response = await axios.get(`https://data.handyapi.com/bin/${req.params.bin}`, { timeout: 4000 });
@@ -136,7 +143,7 @@ app.get('/api/bin/:bin', async (req, res) => {
     }
 });
 
-// Endpoint Coordenadas
+// Endpoint Geolocalizador (Dirección a Coordenadas)
 app.get('/api/geocode', async (req, res) => {
     const { direccion } = req.query;
     if (!direccion) return res.status(400).json({ error: 'Dirección requerida' });
@@ -158,57 +165,11 @@ app.get('/api/geocode', async (req, res) => {
             }));
             return res.json({ exito: true, resultados });
         }
-        res.json({ exito: false, mensaje: 'No se encontraron coordenadas para esa dirección' });
+        res.json({ exito: false, mensaje: 'No se encontraron coordenadas para esa dirección.' });
     } catch (e) {
-        res.status(500).json({ exito: false, mensaje: 'Error en el servicio de mapas' });
-    }
-});
-
-// Endpoint Consulta Registro No Llame
-app.get('/api/nollame/:numero', async (req, res) => {
-    const numeroLimpio = req.params.numero.replace(/\D/g, '');
-    if (!numeroLimpio || numeroLimpio.length < 8) {
-        return res.status(400).json({ error: 'Número de teléfono incompleto' });
-    }
-
-    try {
-        // Consultar el backend de Damatec
-        const response = await axios.get(`https://nollame.damatec.com.ar/api/consultar/${numeroLimpio}`, {
-            headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' },
-            timeout: 6000
-        });
-
-        // Damatec devuelve el estado directo
-        if (response.data) {
-            const estaInscripto = response.data.inscripto || response.data.registrado || (typeof response.data === 'string' && response.data.toLowerCase().includes('inscripto'));
-            return res.json({
-                numero: numeroLimpio,
-                inscripto: Boolean(estaInscripto),
-                detalle: response.data.mensaje || (estaInscripto ? 'Inscripto en el Registro No Llame' : 'Línea NO registrada (Apta para contacto)')
-            });
-        }
-    } catch (e) {
-        // En caso de que el endpoint específico de Damatec use POST o tenga formato distinto
-        try {
-            const postRes = await axios.post('https://nollame.damatec.com.ar/api/check', { numero: numeroLimpio }, { timeout: 4000 });
-            if (postRes.data) {
-                return res.json({
-                    numero: numeroLimpio,
-                    inscripto: Boolean(postRes.data.inscripto),
-                    detalle: postRes.data.mensaje || 'Resultado obtenido'
-                });
-            }
-        } catch (err2) {
-            // Si el servicio no responde por timeout
-            return res.json({
-                numero: numeroLimpio,
-                inscripto: false,
-                indeterminado: true,
-                detalle: 'Servicio No Llame momentáneamente no disponible. Verifique manualmente.'
-            });
-        }
+        res.status(500).json({ exito: false, mensaje: 'Error al consultar el servicio satelital.' });
     }
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Puerto ${PORT}`));
+app.listen(PORT, () => console.log(`Servidor activo en el puerto ${PORT}`));
