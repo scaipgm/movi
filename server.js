@@ -6,9 +6,10 @@ const app = express();
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-const CLAVE_SECRETA = process.env.APP_PASSWORD || "miclave123";
+// Contraseña establecida
+const CLAVE_SECRETA = process.env.APP_PASSWORD || "tarde";
 
-// 1. Cálculo de CUIT / CUIL oficial (Módulo 11)
+// 1. CUIT / CUIL oficial (Módulo 11)
 function calcularCUIT(dni, genero) {
     const dniStr = dni.toString().padStart(8, '0');
     let prefijo = genero === 'M' ? '20' : (genero === 'F' ? '27' : '20');
@@ -32,12 +33,11 @@ function calcularCUIT(dni, genero) {
     return `${prefijo}${dniStr}${digito}`;
 }
 
-// 2. Consulta al BCRA (Central de Deudores)
+// 2. BCRA
 async function consultarBCRA(cuit) {
     let denominacion = null;
     let registros = [];
 
-    // Intento 1: Deudas Actuales
     try {
         const res = await axios.get(`https://api.bcra.gob.ar/centraldedeudores/v1.0/Deudas/${cuit}`, {
             headers: { 'Accept': 'application/json' },
@@ -61,7 +61,6 @@ async function consultarBCRA(cuit) {
         }
     } catch (e) {}
 
-    // Intento 2: Histórico (últimos 24 meses) si no trajo denominación o deuda activa
     if (registros.length === 0 || !denominacion) {
         try {
             const resHist = await axios.get(`https://api.bcra.gob.ar/centraldedeudores/v1.0/Deudas/Historicas/${cuit}`, {
@@ -92,17 +91,11 @@ async function consultarBCRA(cuit) {
     return { denominacion, registros };
 }
 
-// Endpoint de consulta de persona
+// Endpoint Persona
 app.post('/api/consultar', async (req, res) => {
     const { dni, genero, password } = req.body;
-
-    if (password !== CLAVE_SECRETA) {
-        return res.status(401).json({ error: 'Contraseña de acceso incorrecta.' });
-    }
-
-    if (!dni || isNaN(dni)) {
-        return res.status(400).json({ error: 'DNI inválido.' });
-    }
+    if (password !== CLAVE_SECRETA) return res.status(401).json({ error: 'Contraseña incorrecta.' });
+    if (!dni || isNaN(dni)) return res.status(400).json({ error: 'DNI inválido.' });
 
     let cuits = [];
     if (genero === 'M' || genero === 'F') {
@@ -122,15 +115,13 @@ app.post('/api/consultar', async (req, res) => {
             bcra: bcra
         });
     }
-
     res.json({ dni, reportes });
 });
 
-// Endpoint de consulta de BIN / Banco de Tarjeta
+// Endpoint Tarjetas BIN
 app.get('/api/bin/:bin', async (req, res) => {
-    const { bin } = req.params;
     try {
-        const response = await axios.get(`https://data.handyapi.com/bin/${bin}`, { timeout: 4000 });
+        const response = await axios.get(`https://data.handyapi.com/bin/${req.params.bin}`, { timeout: 4000 });
         if (response.data && response.data.Status === 'SUCCESS') {
             return res.json({
                 valido: true,
@@ -143,6 +134,34 @@ app.get('/api/bin/:bin', async (req, res) => {
         res.json({ valido: false, banco: 'Banco no identificado' });
     } catch (e) {
         res.json({ valido: false, banco: 'Banco no disponible' });
+    }
+});
+
+// Endpoint Geolocalizador (Dirección a Coordenadas)
+app.get('/api/geocode', async (req, res) => {
+    const { direccion } = req.query;
+    if (!direccion) return res.status(400).json({ error: 'Dirección requerida' });
+
+    try {
+        const consulta = `${direccion}, Mendoza, Argentina`;
+        const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(consulta)}&countrycodes=ar&limit=3`;
+        const response = await axios.get(url, {
+            headers: { 'User-Agent': 'GestionVentasTelecomApp/1.0' },
+            timeout: 5000
+        });
+
+        if (response.data && response.data.length > 0) {
+            const resultados = response.data.map(item => ({
+                lat: item.lat,
+                lon: item.lon,
+                nombre: item.display_name,
+                mapsUrl: `https://www.google.com/maps?q=${item.lat},${item.lon}`
+            }));
+            return res.json({ exito: true, resultados });
+        }
+        res.json({ exito: false, mensaje: 'No se encontraron coordenadas para esa dirección' });
+    } catch (e) {
+        res.status(500).json({ exito: false, mensaje: 'Error en el servicio de mapas' });
     }
 });
 
