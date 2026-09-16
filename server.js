@@ -6,10 +6,9 @@ const app = express();
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Contraseña establecida
 const CLAVE_SECRETA = process.env.APP_PASSWORD || "tarde";
 
-// 1. CUIT / CUIL oficial (Módulo 11)
+// 1. CUIT / CUIL (Módulo 11)
 function calcularCUIT(dni, genero) {
     const dniStr = dni.toString().padStart(8, '0');
     let prefijo = genero === 'M' ? '20' : (genero === 'F' ? '27' : '20');
@@ -137,7 +136,7 @@ app.get('/api/bin/:bin', async (req, res) => {
     }
 });
 
-// Endpoint Geolocalizador (Dirección a Coordenadas)
+// Endpoint Coordenadas
 app.get('/api/geocode', async (req, res) => {
     const { direccion } = req.query;
     if (!direccion) return res.status(400).json({ error: 'Dirección requerida' });
@@ -165,5 +164,51 @@ app.get('/api/geocode', async (req, res) => {
     }
 });
 
+// Endpoint Consulta Registro No Llame
+app.get('/api/nollame/:numero', async (req, res) => {
+    const numeroLimpio = req.params.numero.replace(/\D/g, '');
+    if (!numeroLimpio || numeroLimpio.length < 8) {
+        return res.status(400).json({ error: 'Número de teléfono incompleto' });
+    }
+
+    try {
+        // Consultar el backend de Damatec
+        const response = await axios.get(`https://nollame.damatec.com.ar/api/consultar/${numeroLimpio}`, {
+            headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' },
+            timeout: 6000
+        });
+
+        // Damatec devuelve el estado directo
+        if (response.data) {
+            const estaInscripto = response.data.inscripto || response.data.registrado || (typeof response.data === 'string' && response.data.toLowerCase().includes('inscripto'));
+            return res.json({
+                numero: numeroLimpio,
+                inscripto: Boolean(estaInscripto),
+                detalle: response.data.mensaje || (estaInscripto ? 'Inscripto en el Registro No Llame' : 'Línea NO registrada (Apta para contacto)')
+            });
+        }
+    } catch (e) {
+        // En caso de que el endpoint específico de Damatec use POST o tenga formato distinto
+        try {
+            const postRes = await axios.post('https://nollame.damatec.com.ar/api/check', { numero: numeroLimpio }, { timeout: 4000 });
+            if (postRes.data) {
+                return res.json({
+                    numero: numeroLimpio,
+                    inscripto: Boolean(postRes.data.inscripto),
+                    detalle: postRes.data.mensaje || 'Resultado obtenido'
+                });
+            }
+        } catch (err2) {
+            // Si el servicio no responde por timeout
+            return res.json({
+                numero: numeroLimpio,
+                inscripto: false,
+                indeterminado: true,
+                detalle: 'Servicio No Llame momentáneamente no disponible. Verifique manualmente.'
+            });
+        }
+    }
+});
+
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Servidor activo en el puerto ${PORT}`));
+app.listen(PORT, () => console.log(`Puerto ${PORT}`));
