@@ -6,7 +6,6 @@ const app = express();
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// CLAVE DE ACCESO: cámbiala por la contraseña que quieras
 const CLAVE_SECRETA = process.env.APP_PASSWORD || "miclave123";
 
 function calcularCUIT(dni, genero) {
@@ -32,12 +31,79 @@ function calcularCUIT(dni, genero) {
     return `${prefijo}${dniStr}${digito}`;
 }
 
+async function consultarBCRA(cuit) {
+    // 1. Consulta deuda actual
+    let denominacion = null;
+    let registros = [];
+
+    try {
+        const resActual = await axios.get(`https://api.bcra.gob.ar/centraldedeudores/v1.0/Deudas/${cuit}`, {
+            headers: { 'Accept': 'application/json' },
+            timeout: 7000
+        });
+
+        if (resActual.data && resActual.data.results) {
+            denominacion = resActual.data.results.denominacion || denominacion;
+            const periodos = resActual.data.results.periodos || [];
+            for (const p of periodos) {
+                if (p.entidades) {
+                    for (const ent of p.entidades) {
+                        registros.push({
+                            periodo: p.periodo,
+                            entidad: ent.entidad,
+                            situacion: ent.situacion,
+                            monto: ent.monto,
+                            diasAtraso: ent.diasAtrasoPago || 0
+                        });
+                    }
+                }
+            }
+        }
+    } catch (e) {
+        // Ignorar 404
+    }
+
+    // 2. Si no hay denominación o no hay deudas vigentes, consultar Históricas (últimos 24 meses)
+    if (registros.length === 0 || !denominacion) {
+        try {
+            const resHist = await axios.get(`https://api.bcra.gob.ar/centraldedeudores/v1.0/Deudas/Historicas/${cuit}`, {
+                headers: { 'Accept': 'application/json' },
+                timeout: 7000
+            });
+
+            if (resHist.data && resHist.data.results) {
+                denominacion = resHist.data.results.denominacion || denominacion;
+                const periodos = resHist.data.results.periodos || [];
+                // Si aún no tenemos registros, extraemos los últimos históricos reportados
+                if (registros.length === 0 && periodos.length > 0) {
+                    const ultPeriodo = periodos[0];
+                    if (ultPeriodo.entidades) {
+                        for (const ent of ultPeriodo.entidades) {
+                            registros.push({
+                                periodo: ultPeriodo.periodo,
+                                entidad: ent.entidad,
+                                situacion: ent.situacion,
+                                monto: ent.monto,
+                                diasAtraso: ent.diasAtrasoPago || 0,
+                                historico: true
+                            });
+                        }
+                    }
+                }
+            }
+        } catch (e) {
+            // Ignorar 404
+        }
+    }
+
+    return { denominacion, registros };
+}
+
 app.post('/api/consultar', async (req, res) => {
     const { dni, genero, password } = req.body;
 
-    // Validación de seguridad privada
     if (password !== CLAVE_SECRETA) {
-        return res.status(401).json({ error: 'Contraseña incorrecta. Acceso no autorizado.' });
+        return res.status(401).json({ error: 'Contraseña incorrecta.' });
     }
 
     if (!dni || isNaN(dni)) {
@@ -55,32 +121,17 @@ app.post('/api/consultar', async (req, res) => {
     const reportes = [];
 
     for (const item of cuits) {
-        try {
-            const url = `https://api.bcra.gob.ar/centraldedeudores/v1.0/Deudas/${item.cuit}`;
-            const bcraRes = await axios.get(url, { 
-                headers: { 'Accept': 'application/json' },
-                timeout: 5000 
-            });
-            reportes.push({
-                genero: item.genero,
-                cuit: item.cuit,
-                datosBCRA: bcraRes.data.results || null
-            });
-        } catch (err) {
-            reportes.push({
-                genero: item.genero,
-                cuit: item.cuit,
-                datosBCRA: null,
-                nota: 'Sin registros de deuda reportados al BCRA'
-            });
-        }
+        const resultadoBCRA = await consultarBCRA(item.cuit);
+        reportes.push({
+            genero: item.genero,
+            cuit: item.cuit,
+            denominacion: resultadoBCRA.denominacion,
+            registros: resultadoBCRA.registros
+        });
     }
 
     res.json({ dni, reportes });
 });
 
-// Render asigna el puerto automáticamente en process.env.PORT
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`App activa en el puerto ${PORT}`);
-});
+app.listen(PORT, () => console.log(`Puerto ${PORT}`));
