@@ -20,10 +20,10 @@
             --primary-hover: #2c5282;
             --shadow: rgba(0,0,0,0.08);
 
-            /* Colores solicitados para situaciones */
+            /* Colores de situación solicitados */
             --color-sit-1: #22c55e; /* Verde */
-            --color-sit-mid: #eab308; /* Amarillo (2 a 4) */
-            --color-sit-5: #ef4444; /* Rojo (5) */
+            --color-sit-mid: #eab308; /* Amarillo (Sit 2 a 4) */
+            --color-sit-5: #ef4444; /* Rojo (Sit 5) */
         }
 
         body.dark-mode {
@@ -52,13 +52,7 @@
         }
 
         .container { max-width: 650px; margin: 10px auto; }
-
-        .top-bar {
-            display: flex;
-            justify-content: flex-end;
-            margin-bottom: 8px;
-        }
-
+        .top-bar { display: flex; justify-content: flex-end; margin-bottom: 8px; }
         .btn-theme {
             background: var(--bg-card);
             border: 1px solid var(--border-color);
@@ -127,9 +121,9 @@
         .btn-copy { background: #475569; color: white; }
         .btn-copy:hover { background: #334155; }
         .btn-arca { background: #0d9488; color: white; text-decoration: none; display: inline-block; padding: 8px 12px; border-radius: 6px; font-size: 13px; font-weight: bold; margin-top: 8px; }
-        
-        /* Badges BCRA con los colores solicitados */
-        .badge { display: inline-block; padding: 4px 10px; border-radius: 4px; font-size: 13px; font-weight: bold; color: white; }
+
+        /* Colores exactos de Situaciones */
+        .badge { display: inline-block; padding: 4px 10px; border-radius: 4px; font-size: 13px; font-weight: bold; }
         .badge-sit-1 { background-color: var(--color-sit-1); color: #064e3b; font-weight: 800; }
         .badge-sit-mid { background-color: var(--color-sit-mid); color: #713f12; font-weight: 800; }
         .badge-sit-5 { background-color: var(--color-sit-5); color: #ffffff; font-weight: 800; }
@@ -173,7 +167,7 @@
         <div id="out-persona"></div>
     </div>
 
-    <!-- 2. MAPA DE GOOGLE INTERACTIVO PARA COBERTURA -->
+    <!-- 2. MAPA DE GOOGLE INTERACTIVO CON COORDENADAS -->
     <div id="tab-geo" class="card" style="display:none;">
         <h2>Buscar Cobertura en Google Maps</h2>
         <label>Dirección y localidad (o entrecalle):</label>
@@ -182,13 +176,23 @@
             <button class="btn-sm" style="background:var(--primary); color:white; padding:0 16px;" onclick="buscarEnGoogleMaps()">Buscar</button>
         </div>
 
-        <!-- Ventana de Google Maps embebida dentro de la página -->
-        <div style="width: 100%; height: 450px; border-radius: 8px; overflow: hidden; border: 1px solid var(--border-color); margin-top: 15px; background: white;">
+        <!-- Coordenadas listas para copiar -->
+        <div id="box-coords" style="display:none; margin-top:12px; background:var(--box-bg); padding:10px; border-radius:6px; border:1px solid var(--border-color);">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                    <span style="font-size:12px; color:var(--text-muted); font-weight:bold;">COORDENADAS:</span><br>
+                    <span id="coords-val" style="font-family:monospace; font-size:16px; font-weight:bold; color:var(--primary);">-</span>
+                </div>
+                <button class="btn-sm btn-copy" onclick="copiarCoords()">Copiar Coords</button>
+            </div>
+        </div>
+
+        <div style="width: 100%; height: 450px; border-radius: 8px; overflow: hidden; border: 1px solid var(--border-color); margin-top: 12px; background: white;">
             <iframe id="mapa-frame" src="https://maps.google.com/maps?q=Las%20Heras,%20Mendoza&t=&z=14&ie=UTF8&iwloc=&output=embed" style="width: 100%; height: 100%; border: none;"></iframe>
         </div>
         <div style="display:flex; justify-content:space-between; margin-top:10px;">
             <button class="btn-sm btn-copy" onclick="copiarDireccion()">Copiar Dirección</button>
-            <a id="link-maps-externo" href="https://www.google.com/maps" target="_blank" style="font-size:13px; color:var(--primary); font-weight:bold; text-decoration:none; padding:8px 0;">Abrir en app externa ↗</a>
+            <a id="link-maps-externo" href="https://www.google.com/maps" target="_blank" style="font-size:13px; color:var(--primary); font-weight:bold; text-decoration:none; padding:8px 0;">Abrir en app de Maps ↗</a>
         </div>
     </div>
 
@@ -219,10 +223,9 @@
 </div>
 
 <script>
-// Manejo de Modo Oscuro
+// Modo Oscuro
 function toggleTheme() {
-    const body = document.body;
-    const isDark = body.classList.toggle('dark-mode');
+    const isDark = document.body.classList.toggle('dark-mode');
     const btn = document.getElementById('theme-toggle');
     if (isDark) {
         btn.innerHTML = '☀️ Modo Claro';
@@ -255,16 +258,78 @@ function copiar(t) {
 
 // 🟢 SITUACIÓN 1 = VERDE | 🟡 2,3,4 = AMARILLO | 🔴 5 = ROJO
 function getSituacionInfo(sit) {
-    const s = parseInt(sit, 10);
+    const s = parseInt(sit, 10) || 1;
     if (s === 1) {
         return { texto: 'Situación 1 (Normal / Al día)', clase: 'badge-sit-1' };
     } else if (s >= 2 && s <= 4) {
-        let detalle = s === 2 ? 'Riesgo Bajo (Mora 31-90)' : (s === 3 ? 'Riesgo Medio (Mora 91-180)' : 'Alto Riesgo (> 180)');
-        return { texto: `Situación ${s} (${detalle})`, clase: 'badge-sit-mid' };
+        let det = s === 2 ? 'Riesgo Bajo (Mora 31-90 días)' : (s === 3 ? 'Riesgo Medio (Mora 91-180 días)' : 'Alto Riesgo (> 180 días)');
+        return { texto: `Situación ${s} - ${det}`, clase: 'badge-sit-mid' };
     } else if (s >= 5) {
-        return { texto: 'Situación 5 (Irrecuperable / Incobrable)', clase: 'badge-sit-5' };
+        return { texto: 'Situación 5 - Irrecuperable / Incobrable', clase: 'badge-sit-5' };
     }
     return { texto: `Situación ${sit}`, clase: 'badge-sit-1' };
+}
+
+// Respaldo de conexión local desde tu navegador en Argentina
+async function clienteFetchBCRA(cuit) {
+    const urlDirecta = `https://api.bcra.gob.ar/centraldedeudores/v1.0/Deudas/${cuit}`;
+    const urlHist = `https://api.bcra.gob.ar/centraldedeudores/v1.0/Deudas/Historicas/${cuit}`;
+
+    async function req(url) {
+        try {
+            const r = await fetch(url);
+            if (r.ok) return await r.json();
+        } catch (e) {
+            try {
+                const proxy = `https://corsproxy.io/?${encodeURIComponent(url)}`;
+                const rp = await fetch(proxy);
+                if (rp.ok) return await rp.json();
+            } catch (err) {}
+        }
+        return null;
+    }
+
+    let d = await req(urlDirecta);
+    let deudas = [];
+    let denominacion = null;
+
+    if (d && d.results) {
+        denominacion = d.results.denominacion || null;
+        if (d.results.periodos) {
+            d.results.periodos.forEach(p => {
+                const ents = p.entidades || p.deudas || [];
+                ents.forEach(ent => {
+                    deudas.push({
+                        entidad: ent.entidad || ent.denominacion,
+                        periodo: p.periodo,
+                        monto: ent.monto,
+                        situacion: ent.situacion
+                    });
+                });
+            });
+        }
+    }
+
+    if (deudas.length === 0 || !denominacion) {
+        const dh = await req(urlHist);
+        if (dh && dh.results) {
+            denominacion = dh.results.denominacion || denominacion;
+            if (deudas.length === 0 && dh.results.periodos && dh.results.periodos.length > 0) {
+                const ult = dh.results.periodos[0];
+                const ents = ult.entidades || ult.deudas || [];
+                ents.forEach(ent => {
+                    deudas.push({
+                        entidad: ent.entidad || ent.denominacion,
+                        periodo: ult.periodo,
+                        monto: ent.monto,
+                        situacion: ent.situacion
+                    });
+                });
+            }
+        }
+    }
+
+    return { denominacion, deudas };
 }
 
 // 1. Consulta DNI
@@ -275,7 +340,7 @@ async function consultarPersona() {
     const out = document.getElementById('out-persona');
 
     if (!dni || !password) return alert('Ingresa la contraseña y el DNI.');
-    out.innerHTML = '<p style="text-align:center; color:var(--text-muted); margin-top:15px;">Consultando BCRA...</p>';
+    out.innerHTML = '<p style="text-align:center; color:var(--text-muted); margin-top:15px;">Consultando registros oficiales en Central de Deudores...</p>';
 
     try {
         const res = await fetch('/api/consultar', {
@@ -287,21 +352,31 @@ async function consultarPersona() {
         if (data.error) return out.innerHTML = `<p style="color:#e53e3e; text-align:center;">${data.error}</p>`;
 
         let html = '';
-        data.reportes.forEach(item => {
+        for (const item of data.reportes) {
+            let denominacion = item.denominacion;
+            let registros = item.registros || [];
+
+            // Si el servidor en Render fue bloqueado, tu navegador consulta como respaldo
+            if (!denominacion || registros.length === 0) {
+                const aux = await clienteFetchBCRA(item.cuit);
+                if (aux.denominacion) denominacion = aux.denominacion;
+                if (aux.deudas && aux.deudas.length > 0) registros = aux.deudas;
+            }
+
             html += `<div class="box-result">
                 <div style="font-size:12px; font-weight:bold; color:var(--text-muted);">VARIANTE ${item.genero.toUpperCase()}</div>
                 <div style="display:flex; justify-content:space-between; align-items:center; background:var(--bg-body); padding:6px 10px; border-radius:6px; margin:6px 0; border:1px solid var(--border-color);">
                     <span style="font-family:monospace; font-size:17px; font-weight:bold;">${item.cuit}</span>
                     <button class="btn-sm btn-copy" onclick="copiar('${item.cuit}')">Copiar CUIT</button>
                 </div>
-                <div style="margin: 8px 0;"><strong>Nombre / Razón Social:</strong> <span style="color:var(--primary); font-weight:bold;">${item.denominacion || 'No registrado en BCRA'}</span></div>
+                <div style="margin: 8px 0;"><strong>Nombre / Razón Social:</strong> <span style="color:var(--primary); font-weight:bold;">${denominacion || 'No informado en BCRA'}</span></div>
                 <a href="https://seti.afip.gob.ar/padron-puc-constancia-internet/ConsultaConstanciaAction.do" target="_blank" class="btn-arca" onclick="copiar('${item.cuit}')">
                     🏛️ Abrir Constancia ARCA (Copia CUIT)
                 </a>
                 <div style="margin-top:12px; font-weight:bold;">Situación Crediticia en BCRA:</div>`;
 
-            if (item.bcra && item.bcra.registros && item.bcra.registros.length > 0) {
-                item.bcra.registros.forEach(d => {
+            if (registros && registros.length > 0) {
+                registros.forEach(d => {
                     const sitInfo = getSituacionInfo(d.situacion);
                     html += `<div style="background:var(--item-bg); border:1px solid var(--border-color); padding:10px; border-radius:6px; margin-top:6px;">
                         <div style="font-weight:bold; font-size:14px;">${d.entidad}</div>
@@ -313,23 +388,41 @@ async function consultarPersona() {
                 html += `<p style="color:var(--text-muted); font-size:13px; margin:5px 0;"><em>Sin deudas comerciales ni bancarias registradas en la Central de Deudores del BCRA.</em></p>`;
             }
             html += `</div>`;
-        });
+        }
         out.innerHTML = html;
     } catch (e) {
         out.innerHTML = '<p style="color:#e53e3e; text-align:center;">Error al comunicarse con el servidor.</p>';
     }
 }
 
-// 2. Google Maps Directo en Pantalla
-function buscarEnGoogleMaps() {
+// 2. Google Maps y Extracción de Coordenadas
+let ultimasCoords = '';
+async function buscarEnGoogleMaps() {
     const input = document.getElementById('dir-input').value.trim();
-    if (!input) return alert('Por favor escribe una dirección o intersección.');
+    if (!input) return alert('Por favor escribe una dirección o entrecalle.');
 
     const query = encodeURIComponent(`${input}, Mendoza, Argentina`);
-    const embedUrl = `https://maps.google.com/maps?q=${query}&t=&z=16&ie=UTF8&iwloc=&output=embed`;
-    
-    document.getElementById('mapa-frame').src = embedUrl;
+    document.getElementById('mapa-frame').src = `https://maps.google.com/maps?q=${query}&t=&z=16&ie=UTF8&iwloc=&output=embed`;
     document.getElementById('link-maps-externo').href = `https://www.google.com/maps/search/?api=1&query=${query}`;
+
+    try {
+        const res = await fetch(`/api/coords?q=${encodeURIComponent(input)}`);
+        const data = await res.json();
+        if (data.lat && data.lon) {
+            ultimasCoords = `${data.lat}, ${data.lon}`;
+            document.getElementById('coords-val').innerText = ultimasCoords;
+            document.getElementById('box-coords').style.display = 'block';
+        } else {
+            document.getElementById('box-coords').style.display = 'none';
+        }
+    } catch (e) {
+        document.getElementById('box-coords').style.display = 'none';
+    }
+}
+
+function copiarCoords() {
+    if (!ultimasCoords) return;
+    copiar(ultimasCoords);
 }
 
 function copiarDireccion() {
