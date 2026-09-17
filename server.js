@@ -9,12 +9,11 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 const CLAVE_SECRETA = process.env.APP_PASSWORD || "tarde";
 
-// Agente HTTPS para asegurar conexión con servidores gubernamentales
 const httpsAgent = new https.Agent({
     rejectUnauthorized: false
 });
 
-// 1. Cálculo de CUIT / CUIL (Módulo 11)
+// Algoritmo oficial de CUIT / CUIL (Módulo 11)
 function calcularCUIT(dni, genero) {
     const dniStr = dni.toString().padStart(8, '0');
     let prefijo = genero === 'M' ? '20' : (genero === 'F' ? '27' : '20');
@@ -38,7 +37,6 @@ function calcularCUIT(dni, genero) {
     return `${prefijo}${dniStr}${digito}`;
 }
 
-// 2. Extractor unificado de deudas BCRA
 function parsearPeriodos(periodos) {
     const registros = [];
     if (!Array.isArray(periodos)) return registros;
@@ -48,7 +46,7 @@ function parsearPeriodos(periodos) {
         for (const ent of entidades) {
             registros.push({
                 periodo: p.periodo || 'Reciente',
-                entidad: ent.entidad || ent.denominacion || 'Entidad no especificada',
+                entidad: ent.entidad || ent.denominacion || 'Entidad financiera',
                 situacion: parseInt(ent.situacion, 10) || 1,
                 monto: ent.monto || 0,
                 diasAtraso: ent.diasAtrasoPago || ent.diasAtraso || 0
@@ -58,38 +56,36 @@ function parsearPeriodos(periodos) {
     return registros;
 }
 
-async function consultarBCRA(cuit) {
+// Consulta interna al BCRA con headers de navegador
+async function consultarBCRAInterno(cuit) {
     let denominacion = null;
     let registros = [];
 
-    const configHeaders = {
+    const config = {
         headers: {
             'Accept': 'application/json',
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36'
         },
         httpsAgent,
-        timeout: 6000
+        timeout: 5000
     };
 
-    // Consulta 1: Deudas Actuales
     try {
-        const res = await axios.get(`https://api.bcra.gob.ar/centraldedeudores/v1.0/Deudas/${cuit}`, configHeaders);
-        if (res.data && res.data.results) {
-            denominacion = res.data.results.denominacion || null;
-            registros = parsearPeriodos(res.data.results.periodos);
+        const rActual = await axios.get(`https://api.bcra.gob.ar/centraldedeudores/v1.0/Deudas/${cuit}`, config);
+        if (rActual.data && rActual.data.results) {
+            denominacion = rActual.data.results.denominacion || null;
+            registros = parsearPeriodos(rActual.data.results.periodos);
         }
     } catch (e) {}
 
-    // Consulta 2: Si no trajo nombre o deudas vigentes, revisa Históricas (24 meses)
     if (registros.length === 0 || !denominacion) {
         try {
-            const resHist = await axios.get(`https://api.bcra.gob.ar/centraldedeudores/v1.0/Deudas/Historicas/${cuit}`, configHeaders);
-            if (resHist.data && resHist.data.results) {
-                denominacion = resHist.data.results.denominacion || denominacion;
-                const ultimosHist = parsearPeriodos(resHist.data.results.periodos);
-                if (registros.length === 0 && ultimosHist.length > 0) {
-                    // Tomamos el período más reciente del historial
-                    registros = ultimosHist.slice(0, 10);
+            const rHist = await axios.get(`https://api.bcra.gob.ar/centraldedeudores/v1.0/Deudas/Historicas/${cuit}`, config);
+            if (rHist.data && rHist.data.results) {
+                denominacion = rHist.data.results.denominacion || denominacion;
+                const ult = parsearPeriodos(rHist.data.results.periodos);
+                if (registros.length === 0 && ult.length > 0) {
+                    registros = ult.slice(0, 15);
                 }
             }
         } catch (e) {}
@@ -118,15 +114,40 @@ app.post('/api/consultar', async (req, res) => {
 
     const reportes = [];
     for (const item of cuits) {
-        const bcra = await consultarBCRA(item.cuit);
+        const datos = await consultarBCRAInterno(item.cuit);
         reportes.push({
             genero: item.genero,
             cuit: item.cuit,
-            denominacion: bcra.denominacion,
-            bcra: bcra
+            denominacion: datos.denominacion,
+            registros: datos.registros
         });
     }
+
     res.json({ dni, reportes });
+});
+
+// Endpoint Coordenadas exactas para cobertura
+app.get('/api/coords', async (req, res) => {
+    const { q } = req.query;
+    if (!q) return res.status(400).json({ error: 'Dirección requerida' });
+    try {
+        const query = `${q}, Mendoza, Argentina`;
+        const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&countrycodes=ar&limit=1`;
+        const response = await axios.get(url, {
+            headers: { 'User-Agent': 'GestionCallMoviApp/2.0' },
+            timeout: 5000
+        });
+        if (response.data && response.data.length > 0) {
+            return res.json({
+                lat: response.data[0].lat,
+                lon: response.data[0].lon,
+                display: response.data[0].display_name
+            });
+        }
+        res.json({ error: 'No se encontraron coordenadas' });
+    } catch (e) {
+        res.status(500).json({ error: 'Error al consultar coordenadas' });
+    }
 });
 
 // Endpoint Tarjetas BIN
@@ -149,4 +170,4 @@ app.get('/api/bin/:bin', async (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Servidor activo en el puerto ${PORT}`));
+app.listen(PORT, () => console.log(`Puerto ${PORT}`));
