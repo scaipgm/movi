@@ -130,7 +130,6 @@
         .card-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 14px; }
         .box-result { margin-top: 15px; padding: 14px; border-radius: 8px; background: var(--box-bg); border: 1px solid var(--border-color); }
 
-        /* Estados de Validación para Movi */
         .movi-status-box { padding: 12px; border-radius: 6px; margin-bottom: 12px; text-align: center; font-weight: bold; font-size: 14px; }
         .movi-rechazada { background: #fee2e2; border: 2px solid #ef4444; color: #991b1b; }
         .movi-aprobada { background: #dcfce7; border: 2px solid #22c55e; color: #166534; }
@@ -171,7 +170,7 @@
         <div id="out-persona"></div>
     </div>
 
-    <!-- 2. MAPA DE GOOGLE INTERACTIVO CON COORDENADAS -->
+    <!-- 2. MAPA COBERTURA -->
     <div id="tab-geo" class="card" style="display:none;">
         <h2>Buscar Cobertura en Google Maps</h2>
         <label>Dirección y localidad (o entrecalle):</label>
@@ -199,28 +198,27 @@
         </div>
     </div>
 
-    <!-- 3. REGISTRO NO LLAME -->
+    <!-- 3. NO LLAME -->
     <div id="tab-nollame" class="card" style="display:none; padding: 12px;">
         <div style="width: 100%; height: 500px; border-radius: 8px; overflow: hidden; border: 1px solid var(--border-color); background: white;">
             <iframe id="frame-nollame" src="https://nollame.damatec.com.ar/" style="width: 100%; height: 100%; border: none;"></iframe>
         </div>
     </div>
 
-    <!-- 4. VALIDADOR DE TARJETAS (CON REGLAS MOVI Y NARANJA X) -->
+    <!-- 4. VALIDADOR DE TARJETAS -->
     <div id="tab-tarjeta" class="card" style="display:none;">
         <h2>Validador de Tarjetas (Filtro Call Movi)</h2>
         <label>Número de Tarjeta: <span id="contador-digitos" class="counter-badge">0 dígitos</span></label>
         <input type="text" id="num-tarjeta" placeholder="Pega los dígitos aquí..." maxlength="23" oninput="analizarTarjeta()">
 
         <div class="box-result">
-            <!-- Estado en Sistema Movi -->
             <div id="movi-alert" class="movi-status-box movi-alerta" style="display:none;"></div>
 
             <div class="card-row"><span><strong>Cantidad de Dígitos:</strong></span><span id="card-len">0</span></div>
             <div class="card-row"><span><strong>Red / Franquicia:</strong></span><span id="card-brand" style="font-weight:bold;">-</span></div>
             <div class="card-row"><span><strong>Tipo:</strong></span><span id="card-type">-</span></div>
-            <div class="card-row"><span><strong>Banco / Entidad:</strong></span><span id="card-bank" style="font-weight:bold; color:var(--primary);">-</span></div>
-            <div class="card-row"><span><strong>Naranja X:</strong></span><span id="card-naranja" style="font-weight:bold;">-</span></div>
+            <div class="card-row"><span><strong>Banco Emisor:</strong></span><span id="card-bank" style="font-weight:bold; color:var(--primary);">-</span></div>
+            <div class="card-row"><span><strong>Tarjeta Naranja:</strong></span><span id="card-naranja" style="font-weight:bold;">-</span></div>
             <div class="card-row"><span><strong>País:</strong></span><span id="card-country">-</span></div>
             <div class="card-row" style="border-top:1px solid var(--border-color); padding-top:8px;">
                 <span><strong>Validación Luhn (Matemática):</strong></span><span id="card-luhn" style="font-weight:bold;">-</span>
@@ -230,7 +228,7 @@
 </div>
 
 <script>
-// Manejo de Modo Oscuro
+// Modo Oscuro
 function toggleTheme() {
     const isDark = document.body.classList.toggle('dark-mode');
     const btn = document.getElementById('theme-toggle');
@@ -263,7 +261,6 @@ function copiar(t) {
     alert('Copiado: ' + t);
 }
 
-// Situaciones con los colores exactos
 function getSituacionInfo(sit) {
     const s = parseInt(sit, 10) || 1;
     if (s === 1) {
@@ -277,7 +274,7 @@ function getSituacionInfo(sit) {
     return { texto: `Situación ${sit}`, clase: 'badge-sit-1' };
 }
 
-// Respaldo de conexión local desde tu navegador en Argentina
+// Respaldo BCRA local
 async function clienteFetchBCRA(cuit) {
     const urlDirecta = `https://api.bcra.gob.ar/centraldedeudores/v1.0/Deudas/${cuit}`;
     const urlHist = `https://api.bcra.gob.ar/centraldedeudores/v1.0/Deudas/Historicas/${cuit}`;
@@ -339,7 +336,7 @@ async function clienteFetchBCRA(cuit) {
     return { denominacion, deudas };
 }
 
-// 1. Consulta DNI
+// 1. DNI
 async function consultarPersona() {
     const dni = document.getElementById('dni').value.trim();
     const genero = document.getElementById('genero').value;
@@ -401,7 +398,7 @@ async function consultarPersona() {
     }
 }
 
-// 2. Google Maps y Coordenadas
+// 2. Google Maps
 let ultimasCoords = '';
 async function buscarEnGoogleMaps() {
     const input = document.getElementById('dir-input').value.trim();
@@ -437,7 +434,7 @@ function copiarDireccion() {
     copiar(d);
 }
 
-// 3. Validador de Tarjetas con Filtros de Movi y Naranja X
+// 3. Validador de Tarjetas con Base Argentina Corregida
 function luhnCheck(num) {
     let sum = 0, alt = false;
     for (let i = num.length - 1; i >= 0; i--) {
@@ -452,20 +449,51 @@ function identificarMarca(n) {
     if (/^4/.test(n)) return 'VISA';
     if (/^(5[1-5]|2[2-7])/.test(n)) return 'Mastercard';
     if (/^3[47]/.test(n)) return 'American Express';
-    if (/^(5896|5895|5078)/.test(n)) return 'Tarjeta Naranja Propia';
+    if (/^(5895|5896|5078)/.test(n)) return 'Tarjeta Naranja Propia';
     if (/^(6042|6043)/.test(n)) return 'Cabal';
     return 'Desconocida';
 }
 
-// Evaluación de Medios Inválidos según la hoja de Movi
-function evaluarReglasMovi(clean) {
-    // 1. Inválidas directas
+// Base de datos de BINs argentinos corregida
+function resolverBancoNacional(clean) {
+    // 1. BANCO SUPERVIELLE (Prioridad 1 para evitar error de API internacional)
+    if (/^(451772|451771|451770|450993|491410|450766|514931|525301|530060|540945|547631)/.test(clean)) {
+        return { banco: 'BANCO SUPERVIELLE SA', tipo: /^451772/.test(clean) ? 'DEBIT' : 'CREDIT / DEBIT' };
+    }
+
+    // 2. TARJETA NARANJA X REAL
+    if (/^(5895|5896|5078)/.test(clean)) {
+        return { banco: 'TARJETA NARANJA SA', esNaranja: true, tipoNaranja: 'Tarjeta Naranja Propia (Crédito)' };
+    }
+    if (/^(450989|450990|450890|402374)/.test(clean)) {
+        return { banco: 'TARJETA NARANJA SA', esNaranja: true, tipoNaranja: 'Naranja X (Visa)' };
+    }
+    if (/^(534484|543169)/.test(clean)) {
+        return { banco: 'TARJETA NARANJA SA', esNaranja: true, tipoNaranja: 'Naranja X (Mastercard)' };
+    }
+
+    // Otros Bancos Principales
+    if (/^(450770|450771|450772|402914|450849)/.test(clean)) return { banco: 'BANCO GALICIA' };
+    if (/^(450995|450996|451760|451761)/.test(clean)) return { banco: 'BANCO SANTANDER' };
+    if (/^(451754|451755|450970)/.test(clean)) return { banco: 'BBVA BANCO FRANCES' };
+    if (/^(451764|451765|450992)/.test(clean)) return { banco: 'BANCO MACRO' };
+    if (/^(451768|451769|402925)/.test(clean)) return { banco: 'BANCO NACION ARGENTINA' };
+    if (/^(451758|451759)/.test(clean)) return { banco: 'BANCO PROVINCIA DE BS AS' };
+
+    return null;
+}
+
+// Reglas de exclusión del Call Movi
+function evaluarReglasMovi(clean, esNaranja) {
+    if (esNaranja) {
+        return { status: 'RECHAZADA', msg: '⛔ RECHAZADA: TARJETA NARANJA X NO PERMITIDA' };
+    }
     if (/^(60|65|63)/.test(clean)) return { status: 'RECHAZADA', msg: '⛔ RECHAZADA: Comienza con 60, 65 o 63 (No la toma T3 / Cabal Débito)' };
-    if (/^5258|^5577/.test(clean)) return { status: 'RECHAZADA', msg: '⛔ RECHAZADA: Tarjeta UALÁ (Entidad digital no aceptada)' };
-    if (/^5547/.test(clean)) return { status: 'RECHAZADA', msg: '⛔ RECHAZADA: MERCADO PAGO (Entidad digital no aceptada)' };
+    if (/^5258|^5577/.test(clean)) return { status: 'RECHAZADA', msg: '⛔ RECHAZADA: Tarjeta UALÁ (Entidad digital)' };
+    if (/^5547/.test(clean)) return { status: 'RECHAZADA', msg: '⛔ RECHAZADA: MERCADO PAGO (Entidad digital)' };
     if (/^5010/.test(clean)) return { status: 'RECHAZADA', msg: '⛔ RECHAZADA: MAESTRO (5010 no permitida)' };
     if (/^4111/.test(clean)) return { status: 'RECHAZADA', msg: '⛔ RECHAZADA: BRUBANK (Entidad digital)' };
-    if (/^5381/.test(clean)) return { status: 'RECHAZADA', msg: '⛔ RECHAZADA: Tarjeta Carrefour no aceptada' };
+    if (/^5381/.test(clean)) return { status: 'RECHAZADA', msg: '⛔ RECHAZADA: Tarjeta Carrefour' };
     if (/^4040/.test(clean)) return { status: 'RECHAZADA', msg: '⛔ RECHAZADA: LEMON CASH (Entidad digital)' };
     if (/^4278/.test(clean)) return { status: 'RECHAZADA', msg: '⛔ RECHAZADA: PERSONAL PAY' };
     if (/^4348/.test(clean)) return { status: 'RECHAZADA', msg: '⛔ RECHAZADA: Iniciadas con 4348 no permitidas' };
@@ -478,29 +506,9 @@ function evaluarReglasMovi(clean) {
     if (/^5412/.test(clean)) return { status: 'RECHAZADA', msg: '⛔ RECHAZADA: 5412 (No la toma T3)' };
     if (/^4549/.test(clean)) return { status: 'RECHAZADA', msg: '⛔ RECHAZADA: BANCO SOL' };
     if (/^5591/.test(clean)) return { status: 'RECHAZADA', msg: '⛔ RECHAZADA: CENCOPLAY' };
-
-    // 2. Alertas especiales
     if (/^4576/.test(clean)) return { status: 'ALERTA', msg: '⚠️ ATENCIÓN: 4576 - Requiere EFECTIVO SÍ' };
 
     return null;
-}
-
-// Detección específica de Naranja X
-function detectarNaranjaX(clean, bankName) {
-    const bName = (bankName || '').toUpperCase();
-    if (/^(5895|5896|5078)/.test(clean)) {
-        return { esNaranja: true, tipo: 'Tarjeta Naranja Propia (Crédito)' };
-    }
-    if (/^(4509|4508|4023)/.test(clean) || bName.includes('TARJETA NARANJA') || bName.includes('NARANJA X')) {
-        return { esNaranja: true, tipo: 'Naranja X (Visa / Débito o Crédito)' };
-    }
-    if (/^(5344|5431)/.test(clean) && (bName.includes('NARANJA') || bName.includes('TARJETA NARANJA'))) {
-        return { esNaranja: true, tipo: 'Naranja X (Mastercard Prepaga / Débito)' };
-    }
-    if (bName.includes('NARANJA')) {
-        return { esNaranja: true, tipo: 'Naranja X' };
-    }
-    return { esNaranja: false, tipo: 'No' };
 }
 
 let timeoutBin;
@@ -522,15 +530,30 @@ function analizarTarjeta() {
         return;
     }
 
-    // Marca
     document.getElementById('card-brand').innerText = identificarMarca(clean);
 
-    // Validación de la hoja de Movi
-    const reglaMovi = evaluarReglasMovi(clean);
-    if (reglaMovi) {
+    // 1. Revisar en Base Argentina local primero
+    const bancoLocal = resolverBancoNacional(clean);
+    let esNaranja = Boolean(bancoLocal && bancoLocal.esNaranja);
+    let nombreBanco = bancoLocal ? bancoLocal.banco : '-';
+
+    document.getElementById('card-bank').innerText = nombreBanco;
+    if (bancoLocal && bancoLocal.tipo) {
+        document.getElementById('card-type').innerText = bancoLocal.tipo;
+    }
+
+    if (esNaranja) {
+        document.getElementById('card-naranja').innerHTML = `<span style="color:#ef4444; font-weight:800;">🍊 SÍ: ${bancoLocal.tipoNaranja}</span>`;
+    } else {
+        document.getElementById('card-naranja').innerHTML = '<span style="color:#22c55e; font-weight:bold;">No (Habilitada)</span>';
+    }
+
+    // 2. Evaluar reglas de Movi
+    const regla = evaluarReglasMovi(clean, esNaranja);
+    if (regla) {
         alertBox.style.display = 'block';
-        alertBox.className = 'movi-status-box ' + (reglaMovi.status === 'RECHAZADA' ? 'movi-rechazada' : 'movi-alerta');
-        alertBox.innerText = reglaMovi.msg;
+        alertBox.className = 'movi-status-box ' + (regla.status === 'RECHAZADA' ? 'movi-rechazada' : 'movi-alerta');
+        alertBox.innerText = regla.msg;
     } else if (clean.length >= 6) {
         alertBox.style.display = 'block';
         alertBox.className = 'movi-status-box movi-aprobada';
@@ -539,15 +562,7 @@ function analizarTarjeta() {
         alertBox.style.display = 'none';
     }
 
-    // Detección previa Naranja X
-    const checkNaranja = detectarNaranjaX(clean, '');
-    if (checkNaranja.esNaranja) {
-        document.getElementById('card-naranja').innerHTML = `<span style="color:#ea580c; font-weight:800;">🍊 SÍ: ${checkNaranja.tipo}</span>`;
-    } else {
-        document.getElementById('card-naranja').innerText = 'No';
-    }
-
-    // Algoritmo Luhn
+    // 3. Algoritmo de Luhn
     if (clean.length >= 13) {
         document.getElementById('card-luhn').innerHTML = luhnCheck(clean) 
             ? '<span style="color:#22c55e; font-weight:bold;">✅ VÁLIDA</span>' 
@@ -556,34 +571,35 @@ function analizarTarjeta() {
         document.getElementById('card-luhn').innerText = 'Incompleta...';
     }
 
-    // Consulta BIN internacional
-    if (clean.length >= 6) {
+    // 4. Si el banco no está en la lista fija, consultar API de respaldo (sin pisar Supervielle)
+    if (clean.length >= 6 && (!bancoLocal || bancoLocal.banco !== 'BANCO SUPERVIELLE SA')) {
         clearTimeout(timeoutBin);
         timeoutBin = setTimeout(async () => {
             try {
                 const res = await fetch(`/api/bin/${clean.substring(0, 8)}`);
                 const d = await res.json();
                 if (d.valido) {
-                    document.getElementById('card-bank').innerText = d.banco;
-                    document.getElementById('card-type').innerText = d.tipo;
-                    document.getElementById('card-country').innerText = d.pais;
+                    // Solo actualiza si no teníamos el banco local seguro
+                    if (!bancoLocal) {
+                        const bUpper = (d.banco || '').toUpperCase();
+                        const esNaranjaApi = bUpper.includes('NARANJA') && !clean.startsWith('451772');
+                        
+                        document.getElementById('card-bank').innerText = d.banco;
+                        document.getElementById('card-type').innerText = d.tipo;
+                        document.getElementById('card-country').innerText = d.pais;
 
-                    // Re-chequeo Naranja X con el banco devuelto
-                    const naranjaFinal = detectarNaranjaX(clean, d.banco);
-                    if (naranjaFinal.esNaranja) {
-                        document.getElementById('card-naranja').innerHTML = `<span style="color:#ea580c; font-weight:800;">🍊 SÍ: ${naranjaFinal.tipo}</span>`;
-                    }
-
-                    // Chequeo si la entidad devuelta es digital
-                    const bUpper = (d.banco || '').toUpperCase();
-                    if (bUpper.includes('BRUBANK') || bUpper.includes('SOL') || bUpper.includes('PREX') || bUpper.includes('LEMON') || bUpper.includes('UALA') || bUpper.includes('MERCADO')) {
-                        alertBox.style.display = 'block';
-                        alertBox.className = 'movi-status-box movi-rechazada';
-                        alertBox.innerText = `⛔ RECHAZADA: ${d.banco} es una entidad digital no permitida`;
+                        if (esNaranjaApi) {
+                            document.getElementById('card-naranja').innerHTML = '<span style="color:#ef4444; font-weight:800;">🍊 SÍ (Tarjeta Naranja)</span>';
+                            alertBox.style.display = 'block';
+                            alertBox.className = 'movi-status-box movi-rechazada';
+                            alertBox.innerText = '⛔ RECHAZADA: TARJETA NARANJA X NO PERMITIDA';
+                        }
                     }
                 }
             } catch (e) {}
         }, 400);
+    } else if (bancoLocal && bancoLocal.banco === 'BANCO SUPERVIELLE SA') {
+        document.getElementById('card-country').innerText = 'Argentina';
     }
 }
 </script>
