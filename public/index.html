@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel de Gestión Integral</title>
+    <title>Panel de Gestión Integral - Movi</title>
     <style>
         :root {
             --bg-body: #edf2f7;
@@ -50,7 +50,7 @@
             transition: background 0.2s ease, color 0.2s ease;
         }
 
-        .container { max-width: 650px; margin: 10px auto; }
+        .container { max-width: 680px; margin: 10px auto; }
         .top-bar { display: flex; justify-content: flex-end; margin-bottom: 8px; }
         .btn-theme {
             background: var(--bg-card);
@@ -66,14 +66,14 @@
             margin: 0;
         }
 
-        .tabs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin-bottom: 8px; }
+        .tabs { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; margin-bottom: 8px; }
         .tab-btn { 
-            padding: 10px 4px; 
+            padding: 10px 2px; 
             border: none; 
             background: var(--tab-inactive); 
             color: var(--tab-inactive-text); 
             font-weight: bold; 
-            font-size: 13px; 
+            font-size: 12px; 
             border-radius: 6px 6px 0 0; 
             cursor: pointer; 
             text-align: center; 
@@ -86,24 +86,24 @@
 
         .card { 
             background: var(--bg-card); 
-            padding: 22px; 
+            padding: 20px; 
             border-radius: 0 0 10px 10px; 
             box-shadow: 0 4px 15px var(--shadow); 
         }
 
-        h2 { margin-top: 0; color: var(--text-main); font-size: 19px; text-align: center; }
-        label { display: block; margin-top: 14px; font-weight: 600; color: var(--text-label); font-size: 13px; }
+        h2 { margin-top: 0; color: var(--text-main); font-size: 18px; text-align: center; }
+        label { display: block; margin-top: 12px; font-weight: 600; color: var(--text-label); font-size: 13px; }
 
-        input, select, button { 
+        input, select, button, textarea { 
             width: 100%; 
-            padding: 11px; 
-            margin-top: 5px; 
+            padding: 10px; 
+            margin-top: 4px; 
             border-radius: 6px; 
             border: 1px solid var(--border-color); 
             background: var(--bg-card);
             color: var(--text-main);
             box-sizing: border-box; 
-            font-size: 15px; 
+            font-size: 14px; 
         }
 
         .btn-submit { 
@@ -111,7 +111,7 @@
             color: white; 
             border: none; 
             font-weight: bold; 
-            margin-top: 18px; 
+            margin-top: 16px; 
             cursor: pointer; 
         }
         .btn-submit:hover { background: var(--primary-hover); }
@@ -134,6 +134,38 @@
         .movi-rechazada { background: #fee2e2; border: 2px solid #ef4444; color: #991b1b; }
         .movi-aprobada { background: #dcfce7; border: 2px solid #22c55e; color: #166534; }
         .movi-alerta { background: #fef9c3; border: 2px solid #eab308; color: #854d0e; }
+
+        /* Estilos Formulario Planilla */
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .preview-box {
+            background: var(--box-bg);
+            border: 1px dashed var(--border-color);
+            padding: 12px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 13px;
+            white-space: pre-wrap;
+            margin-top: 15px;
+            color: var(--text-main);
+            max-height: 250px;
+            overflow-y: auto;
+        }
+        .btn-whatsapp {
+            background: #25d366;
+            color: white;
+            border: none;
+            font-size: 16px;
+            font-weight: bold;
+            padding: 14px;
+            border-radius: 6px;
+            margin-top: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .btn-whatsapp:hover { background: #1ebd56; }
     </style>
 </head>
 <body>
@@ -144,10 +176,11 @@
     </div>
 
     <div class="tabs">
-        <button class="tab-btn active" id="btn-t1" onclick="verTab('tab-cuit')">👤 DNI / BCRA</button>
-        <button class="tab-btn" id="btn-t2" onclick="verTab('tab-geo')">📍 Mapa Cobertura</button>
+        <button class="tab-btn active" id="btn-t1" onclick="verTab('tab-cuit')">👤 DNI/BCRA</button>
+        <button class="tab-btn" id="btn-t2" onclick="verTab('tab-geo')">📍 Cobertura</button>
         <button class="tab-btn" id="btn-t3" onclick="verTab('tab-nollame')">🚫 No Llame</button>
         <button class="tab-btn" id="btn-t4" onclick="verTab('tab-tarjeta')">💳 Tarjetas</button>
+        <button class="tab-btn" id="btn-t5" onclick="verTab('tab-planilla')">📋 Planilla</button>
     </div>
 
     <!-- 1. DNI / CUIT / BCRA -->
@@ -185,11 +218,14 @@
                     <span style="font-size:12px; color:var(--text-muted); font-weight:bold;">COORDENADAS:</span><br>
                     <span id="coords-val" style="font-family:monospace; font-size:16px; font-weight:bold; color:var(--primary);">-</span>
                 </div>
-                <button class="btn-sm btn-copy" onclick="copiarCoords()">Copiar Coords</button>
+                <div style="display:flex; gap:6px;">
+                    <button class="btn-sm btn-copy" onclick="copiarCoords()">Copiar Coords</button>
+                    <button class="btn-sm" style="background:#0d9488; color:white;" onclick="pasarCoordsAPlanilla()">Usar en Planilla</button>
+                </div>
             </div>
         </div>
 
-        <div style="width: 100%; height: 450px; border-radius: 8px; overflow: hidden; border: 1px solid var(--border-color); margin-top: 12px; background: white;">
+        <div style="width: 100%; height: 420px; border-radius: 8px; overflow: hidden; border: 1px solid var(--border-color); margin-top: 12px; background: white;">
             <iframe id="mapa-frame" src="https://maps.google.com/maps?q=Las%20Heras,%20Mendoza&t=&z=14&ie=UTF8&iwloc=&output=embed" style="width: 100%; height: 100%; border: none;"></iframe>
         </div>
         <div style="display:flex; justify-content:space-between; margin-top:10px;">
@@ -225,10 +261,85 @@
             </div>
         </div>
     </div>
+
+    <!-- 5. PESTAÑA: PLANILLA DE MOVISTAR -->
+    <div id="tab-planilla" class="card" style="display:none;">
+        <h2>Armador de Planilla Movistar</h2>
+        
+        <div class="form-grid">
+            <div>
+                <label>Plan - Velocidad:</label>
+                <input type="text" id="p-plan" placeholder="Ej: 300 Megas Fibra" oninput="actualizarPreviewPlanilla()">
+            </div>
+            <div>
+                <label>Puntaje:</label>
+                <input type="text" id="p-puntaje" placeholder="Ej: 750 / Apto" oninput="actualizarPreviewPlanilla()">
+            </div>
+        </div>
+
+        <label>Nombre - DNI - Fecha Nacimiento:</label>
+        <input type="text" id="p-cliente" placeholder="Ej: Juan Perez - 40123456 - 15/08/1997" oninput="actualizarPreviewPlanilla()">
+
+        <div class="form-grid">
+            <div>
+                <label>Totalización:</label>
+                <input type="text" id="p-totalizacion" placeholder="Ej: Totalizado con línea 261..." oninput="actualizarPreviewPlanilla()">
+            </div>
+            <div>
+                <label>Coordenadas:</label>
+                <input type="text" id="p-coords" placeholder="Ej: -32.8512, -68.8315" oninput="actualizarPreviewPlanilla()">
+            </div>
+        </div>
+
+        <label>Domicilio / Localidad:</label>
+        <input type="text" id="p-domicilio" placeholder="Ej: Calle El Volcán 2241, Las Heras, Mendoza" oninput="actualizarPreviewPlanilla()">
+
+        <label>Entre calles (3):</label>
+        <input type="text" id="p-entrecalles" placeholder="Ej: Tunuyán, San Martín y Olascoaga" oninput="actualizarPreviewPlanilla()">
+
+        <label>Audio / WhatsApp / Alternativo / FH:</label>
+        <input type="text" id="p-telefonos" placeholder="Ej: 2615123456 / 2615987654 / Mañana" oninput="actualizarPreviewPlanilla()">
+
+        <div class="form-grid">
+            <div>
+                <label>Mail:</label>
+                <input type="email" id="p-mail" placeholder="cliente@gmail.com" oninput="actualizarPreviewPlanilla()">
+            </div>
+            <div>
+                <label>Forma de Pago:</label>
+                <input type="text" id="p-pago" placeholder="Ej: Débito Banco Galicia" oninput="actualizarPreviewPlanilla()">
+            </div>
+        </div>
+
+        <label>Vendedor:</label>
+        <input type="text" id="p-vendedor" placeholder="Tu nombre / matrícula" oninput="actualizarPreviewPlanilla()">
+
+        <div style="margin-top:15px;">
+            <label style="margin-top:0;">Vista previa de la planilla:</label>
+            <div id="planilla-preview" class="preview-box">//PLAN - VELOCIDAD: 
+//NOMBRE - DNI - FECHA NACIMIENTO: 
+//PUNTAJE: 
+//TOTALIZACIÓN: 
+//COORDENADAS: 
+//DOMICILIO / LOCALIDAD: 
+//ENTRE CALLES (3): 
+//AUDIO / WHATSAPP/ ALTERNATIVO / FH: 
+//MAIL: 
+//FORMA DE PAGO: 
+//VENDEDOR: </div>
+        </div>
+
+        <button class="btn-whatsapp" onclick="copiarPlanillaWhatsApp()">
+            📋 Copiar Planilla para WhatsApp
+        </button>
+        <button class="btn-sm btn-copy" style="width:100%; margin-top:8px; padding:10px;" onclick="limpiarPlanilla()">
+            🔄 Limpiar campos
+        </button>
+    </div>
 </div>
 
 <script>
-// Modo Oscuro
+// Manejo de Modo Oscuro
 function toggleTheme() {
     const isDark = document.body.classList.toggle('dark-mode');
     const btn = document.getElementById('theme-toggle');
@@ -246,14 +357,15 @@ if (localStorage.getItem('theme') === 'dark') {
 }
 
 function verTab(id) {
-    ['tab-cuit', 'tab-geo', 'tab-nollame', 'tab-tarjeta'].forEach(t => document.getElementById(t).style.display = 'none');
-    ['btn-t1', 'btn-t2', 'btn-t3', 'btn-t4'].forEach(b => document.getElementById(b).classList.remove('active'));
+    ['tab-cuit', 'tab-geo', 'tab-nollame', 'tab-tarjeta', 'tab-planilla'].forEach(t => document.getElementById(t).style.display = 'none');
+    ['btn-t1', 'btn-t2', 'btn-t3', 'btn-t4', 'btn-t5'].forEach(b => document.getElementById(b).classList.remove('active'));
     document.getElementById(id).style.display = 'block';
 
     if (id === 'tab-cuit') document.getElementById('btn-t1').classList.add('active');
     if (id === 'tab-geo') document.getElementById('btn-t2').classList.add('active');
     if (id === 'tab-nollame') document.getElementById('btn-t3').classList.add('active');
     if (id === 'tab-tarjeta') document.getElementById('btn-t4').classList.add('active');
+    if (id === 'tab-planilla') document.getElementById('btn-t5').classList.add('active');
 }
 
 function copiar(t) {
@@ -261,6 +373,7 @@ function copiar(t) {
     alert('Copiado: ' + t);
 }
 
+// 🟢 SITUACIÓN 1 = VERDE | 🟡 2,3,4 = AMARILLO | 🔴 5 = ROJO
 function getSituacionInfo(sit) {
     const s = parseInt(sit, 10) || 1;
     if (s === 1) {
@@ -274,7 +387,7 @@ function getSituacionInfo(sit) {
     return { texto: `Situación ${sit}`, clase: 'badge-sit-1' };
 }
 
-// Respaldo BCRA local
+// Respaldo BCRA
 async function clienteFetchBCRA(cuit) {
     const urlDirecta = `https://api.bcra.gob.ar/centraldedeudores/v1.0/Deudas/${cuit}`;
     const urlHist = `https://api.bcra.gob.ar/centraldedeudores/v1.0/Deudas/Historicas/${cuit}`;
@@ -428,13 +541,21 @@ function copiarCoords() {
     copiar(ultimasCoords);
 }
 
+function pasarCoordsAPlanilla() {
+    if (!ultimasCoords) return;
+    document.getElementById('p-coords').value = ultimasCoords;
+    actualizarPreviewPlanilla();
+    verTab('tab-planilla');
+    alert('Coordenadas cargadas en la planilla: ' + ultimasCoords);
+}
+
 function copiarDireccion() {
     const d = document.getElementById('dir-input').value.trim();
     if (!d) return alert('Escribe una dirección primero.');
     copiar(d);
 }
 
-// 3. Validador de Tarjetas con Base Argentina Corregida
+// 3. Validador de Tarjetas
 function luhnCheck(num) {
     let sum = 0, alt = false;
     for (let i = num.length - 1; i >= 0; i--) {
@@ -454,14 +575,10 @@ function identificarMarca(n) {
     return 'Desconocida';
 }
 
-// Base de datos de BINs argentinos corregida
 function resolverBancoNacional(clean) {
-    // 1. BANCO SUPERVIELLE (Prioridad 1 para evitar error de API internacional)
     if (/^(451772|451771|451770|450993|491410|450766|514931|525301|530060|540945|547631)/.test(clean)) {
         return { banco: 'BANCO SUPERVIELLE SA', tipo: /^451772/.test(clean) ? 'DEBIT' : 'CREDIT / DEBIT' };
     }
-
-    // 2. TARJETA NARANJA X REAL
     if (/^(5895|5896|5078)/.test(clean)) {
         return { banco: 'TARJETA NARANJA SA', esNaranja: true, tipoNaranja: 'Tarjeta Naranja Propia (Crédito)' };
     }
@@ -471,23 +588,17 @@ function resolverBancoNacional(clean) {
     if (/^(534484|543169)/.test(clean)) {
         return { banco: 'TARJETA NARANJA SA', esNaranja: true, tipoNaranja: 'Naranja X (Mastercard)' };
     }
-
-    // Otros Bancos Principales
     if (/^(450770|450771|450772|402914|450849)/.test(clean)) return { banco: 'BANCO GALICIA' };
     if (/^(450995|450996|451760|451761)/.test(clean)) return { banco: 'BANCO SANTANDER' };
     if (/^(451754|451755|450970)/.test(clean)) return { banco: 'BBVA BANCO FRANCES' };
     if (/^(451764|451765|450992)/.test(clean)) return { banco: 'BANCO MACRO' };
     if (/^(451768|451769|402925)/.test(clean)) return { banco: 'BANCO NACION ARGENTINA' };
     if (/^(451758|451759)/.test(clean)) return { banco: 'BANCO PROVINCIA DE BS AS' };
-
     return null;
 }
 
-// Reglas de exclusión del Call Movi
 function evaluarReglasMovi(clean, esNaranja) {
-    if (esNaranja) {
-        return { status: 'RECHAZADA', msg: '⛔ RECHAZADA: TARJETA NARANJA X NO PERMITIDA' };
-    }
+    if (esNaranja) return { status: 'RECHAZADA', msg: '⛔ RECHAZADA: TARJETA NARANJA X NO PERMITIDA' };
     if (/^(60|65|63)/.test(clean)) return { status: 'RECHAZADA', msg: '⛔ RECHAZADA: Comienza con 60, 65 o 63 (No la toma T3 / Cabal Débito)' };
     if (/^5258|^5577/.test(clean)) return { status: 'RECHAZADA', msg: '⛔ RECHAZADA: Tarjeta UALÁ (Entidad digital)' };
     if (/^5547/.test(clean)) return { status: 'RECHAZADA', msg: '⛔ RECHAZADA: MERCADO PAGO (Entidad digital)' };
@@ -507,7 +618,6 @@ function evaluarReglasMovi(clean, esNaranja) {
     if (/^4549/.test(clean)) return { status: 'RECHAZADA', msg: '⛔ RECHAZADA: BANCO SOL' };
     if (/^5591/.test(clean)) return { status: 'RECHAZADA', msg: '⛔ RECHAZADA: CENCOPLAY' };
     if (/^4576/.test(clean)) return { status: 'ALERTA', msg: '⚠️ ATENCIÓN: 4576 - Requiere EFECTIVO SÍ' };
-
     return null;
 }
 
@@ -532,7 +642,6 @@ function analizarTarjeta() {
 
     document.getElementById('card-brand').innerText = identificarMarca(clean);
 
-    // 1. Revisar en Base Argentina local primero
     const bancoLocal = resolverBancoNacional(clean);
     let esNaranja = Boolean(bancoLocal && bancoLocal.esNaranja);
     let nombreBanco = bancoLocal ? bancoLocal.banco : '-';
@@ -548,7 +657,6 @@ function analizarTarjeta() {
         document.getElementById('card-naranja').innerHTML = '<span style="color:#22c55e; font-weight:bold;">No (Habilitada)</span>';
     }
 
-    // 2. Evaluar reglas de Movi
     const regla = evaluarReglasMovi(clean, esNaranja);
     if (regla) {
         alertBox.style.display = 'block';
@@ -562,7 +670,6 @@ function analizarTarjeta() {
         alertBox.style.display = 'none';
     }
 
-    // 3. Algoritmo de Luhn
     if (clean.length >= 13) {
         document.getElementById('card-luhn').innerHTML = luhnCheck(clean) 
             ? '<span style="color:#22c55e; font-weight:bold;">✅ VÁLIDA</span>' 
@@ -571,7 +678,6 @@ function analizarTarjeta() {
         document.getElementById('card-luhn').innerText = 'Incompleta...';
     }
 
-    // 4. Si el banco no está en la lista fija, consultar API de respaldo (sin pisar Supervielle)
     if (clean.length >= 6 && (!bancoLocal || bancoLocal.banco !== 'BANCO SUPERVIELLE SA')) {
         clearTimeout(timeoutBin);
         timeoutBin = setTimeout(async () => {
@@ -579,7 +685,6 @@ function analizarTarjeta() {
                 const res = await fetch(`/api/bin/${clean.substring(0, 8)}`);
                 const d = await res.json();
                 if (d.valido) {
-                    // Solo actualiza si no teníamos el banco local seguro
                     if (!bancoLocal) {
                         const bUpper = (d.banco || '').toUpperCase();
                         const esNaranjaApi = bUpper.includes('NARANJA') && !clean.startsWith('451772');
@@ -601,6 +706,52 @@ function analizarTarjeta() {
     } else if (bancoLocal && bancoLocal.banco === 'BANCO SUPERVIELLE SA') {
         document.getElementById('card-country').innerText = 'Argentina';
     }
+}
+
+// 4. LÓGICA DE LA PLANILLA MOVISTAR
+function armarTextoPlanilla() {
+    const plan = document.getElementById('p-plan').value.trim();
+    const cliente = document.getElementById('p-cliente').value.trim();
+    const puntaje = document.getElementById('p-puntaje').value.trim();
+    const totalizacion = document.getElementById('p-totalizacion').value.trim();
+    const coords = document.getElementById('p-coords').value.trim();
+    const domicilio = document.getElementById('p-domicilio').value.trim();
+    const entrecalles = document.getElementById('p-entrecalles').value.trim();
+    const telefonos = document.getElementById('p-telefonos').value.trim();
+    const mail = document.getElementById('p-mail').value.trim();
+    const pago = document.getElementById('p-pago').value.trim();
+    const vendedor = document.getElementById('p-vendedor').value.trim();
+
+    return `//PLAN - VELOCIDAD: ${plan}
+//NOMBRE - DNI - FECHA NACIMIENTO: ${cliente}
+//PUNTAJE: ${puntaje}
+//TOTALIZACIÓN: ${totalizacion}
+//COORDENADAS: ${coords}
+//DOMICILIO / LOCALIDAD: ${domicilio}
+//ENTRE CALLES (3): ${entrecalles}
+//AUDIO / WHATSAPP/ ALTERNATIVO / FH: ${telefonos}
+//MAIL: ${mail}
+//FORMA DE PAGO: ${pago}
+//VENDEDOR: ${vendedor}`;
+}
+
+function actualizarPreviewPlanilla() {
+    document.getElementById('planilla-preview').innerText = armarTextoPlanilla();
+}
+
+function copiarPlanillaWhatsApp() {
+    const texto = armarTextoPlanilla();
+    navigator.clipboard.writeText(texto).then(() => {
+        alert('Planilla copiada con éxito al portapapeles. Ya puedes pegarla en tu grupo de soporte en WhatsApp.');
+    });
+}
+
+function limpiarPlanilla() {
+    if (!confirm('¿Deseas limpiar todos los campos de la planilla?')) return;
+    ['p-plan', 'p-cliente', 'p-puntaje', 'p-totalizacion', 'p-coords', 'p-domicilio', 'p-entrecalles', 'p-telefonos', 'p-mail', 'p-pago'].forEach(id => {
+        document.getElementById(id).value = '';
+    });
+    actualizarPreviewPlanilla();
 }
 </script>
 
