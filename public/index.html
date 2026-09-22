@@ -135,7 +135,6 @@
         .movi-aprobada { background: #dcfce7; border: 2px solid #22c55e; color: #166534; }
         .movi-alerta { background: #fef9c3; border: 2px solid #eab308; color: #854d0e; }
 
-        /* Estilos Formulario Planilla */
         .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .preview-box {
             background: var(--box-bg);
@@ -262,7 +261,7 @@
         </div>
     </div>
 
-    <!-- 5. PESTAÑA: PLANILLA DE MOVISTAR -->
+    <!-- 5. PLANILLA MOVISTAR -->
     <div id="tab-planilla" class="card" style="display:none;">
         <h2>Armador de Planilla Movistar</h2>
         
@@ -449,7 +448,7 @@ async function clienteFetchBCRA(cuit) {
     return { denominacion, deudas };
 }
 
-// 1. DNI
+// 1. Consulta DNI
 async function consultarPersona() {
     const dni = document.getElementById('dni').value.trim();
     const genero = document.getElementById('genero').value;
@@ -555,7 +554,7 @@ function copiarDireccion() {
     copiar(d);
 }
 
-// 3. Validador de Tarjetas
+// 3. Validador de Tarjetas con Base Local Argentina
 function luhnCheck(num) {
     let sum = 0, alt = false;
     for (let i = num.length - 1; i >= 0; i--) {
@@ -575,28 +574,52 @@ function identificarMarca(n) {
     return 'Desconocida';
 }
 
+// Base de datos fija local de Bancos Argentinos (Prioridad Absoluta)
 function resolverBancoNacional(clean) {
-    if (/^(451772|451771|451770|450993|491410|450766|514931|525301|530060|540945|547631)/.test(clean)) {
-        return { banco: 'BANCO SUPERVIELLE SA', tipo: /^451772/.test(clean) ? 'DEBIT' : 'CREDIT / DEBIT' };
+    // 1. BANCO SUPERVIELLE
+    if (/^433822/.test(clean)) {
+        return { banco: 'BANCO SUPERVIELLE S.A.', tipo: 'CRÉDITO (Visa)' };
     }
+    if (/^451772/.test(clean)) {
+        return { banco: 'BANCO SUPERVIELLE S.A.', tipo: 'DÉBITO (Visa)' };
+    }
+    if (/^(451771|451770|450993|491410|450766|514931|525301|530060|540945|547631)/.test(clean)) {
+        return { banco: 'BANCO SUPERVIELLE S.A.', tipo: 'CRÉDITO' };
+    }
+
+    // 2. BANCO NACIÓN ARGENTINA
+    if (/^520053/.test(clean)) {
+        return { banco: 'BANCO DE LA NACIÓN ARGENTINA', tipo: 'DÉBITO (Mastercard)' };
+    }
+    if (/^(451768|451769|402925|450974)/.test(clean)) {
+        return { banco: 'BANCO DE LA NACIÓN ARGENTINA', tipo: 'DÉBITO (Visa)' };
+    }
+    if (/^(540946|547632|514932)/.test(clean)) {
+        return { banco: 'BANCO DE LA NACIÓN ARGENTINA', tipo: 'CRÉDITO (Mastercard)' };
+    }
+
+    // 3. TARJETA NARANJA X REAL
     if (/^(5895|5896|5078)/.test(clean)) {
-        return { banco: 'TARJETA NARANJA SA', esNaranja: true, tipoNaranja: 'Tarjeta Naranja Propia (Crédito)' };
+        return { banco: 'TARJETA NARANJA SA', esNaranja: true, tipoNaranja: 'Tarjeta Naranja Propia (Crédito)', tipo: 'CRÉDITO' };
     }
     if (/^(450989|450990|450890|402374)/.test(clean)) {
-        return { banco: 'TARJETA NARANJA SA', esNaranja: true, tipoNaranja: 'Naranja X (Visa)' };
+        return { banco: 'TARJETA NARANJA SA', esNaranja: true, tipoNaranja: 'Naranja X (Visa)', tipo: 'CRÉDITO / DÉBITO' };
     }
     if (/^(534484|543169)/.test(clean)) {
-        return { banco: 'TARJETA NARANJA SA', esNaranja: true, tipoNaranja: 'Naranja X (Mastercard)' };
+        return { banco: 'TARJETA NARANJA SA', esNaranja: true, tipoNaranja: 'Naranja X (Mastercard)', tipo: 'DÉBITO / PREPAGA' };
     }
-    if (/^(450770|450771|450772|402914|450849)/.test(clean)) return { banco: 'BANCO GALICIA' };
-    if (/^(450995|450996|451760|451761)/.test(clean)) return { banco: 'BANCO SANTANDER' };
-    if (/^(451754|451755|450970)/.test(clean)) return { banco: 'BBVA BANCO FRANCES' };
-    if (/^(451764|451765|450992)/.test(clean)) return { banco: 'BANCO MACRO' };
-    if (/^(451768|451769|402925)/.test(clean)) return { banco: 'BANCO NACION ARGENTINA' };
-    if (/^(451758|451759)/.test(clean)) return { banco: 'BANCO PROVINCIA DE BS AS' };
+
+    // 4. OTROS BANCOS PRINCIPALES
+    if (/^(450770|450771|450772|402914|450849)/.test(clean)) return { banco: 'BANCO GALICIA', tipo: 'DÉBITO / CRÉDITO' };
+    if (/^(450995|450996|451760|451761)/.test(clean)) return { banco: 'BANCO SANTANDER', tipo: 'DÉBITO / CRÉDITO' };
+    if (/^(451754|451755|450970)/.test(clean)) return { banco: 'BBVA BANCO FRANCÉS', tipo: 'DÉBITO / CRÉDITO' };
+    if (/^(451764|451765|450992)/.test(clean)) return { banco: 'BANCO MACRO', tipo: 'DÉBITO / CRÉDITO' };
+    if (/^(451758|451759)/.test(clean)) return { banco: 'BANCO PROVINCIA DE BS AS', tipo: 'DÉBITO / CRÉDITO' };
+
     return null;
 }
 
+// Reglas de exclusión del Call Movi
 function evaluarReglasMovi(clean, esNaranja) {
     if (esNaranja) return { status: 'RECHAZADA', msg: '⛔ RECHAZADA: TARJETA NARANJA X NO PERMITIDA' };
     if (/^(60|65|63)/.test(clean)) return { status: 'RECHAZADA', msg: '⛔ RECHAZADA: Comienza con 60, 65 o 63 (No la toma T3 / Cabal Débito)' };
@@ -642,14 +665,13 @@ function analizarTarjeta() {
 
     document.getElementById('card-brand').innerText = identificarMarca(clean);
 
+    // 1. Revisión prioritaria en Base Argentina local
     const bancoLocal = resolverBancoNacional(clean);
     let esNaranja = Boolean(bancoLocal && bancoLocal.esNaranja);
     let nombreBanco = bancoLocal ? bancoLocal.banco : '-';
 
     document.getElementById('card-bank').innerText = nombreBanco;
-    if (bancoLocal && bancoLocal.tipo) {
-        document.getElementById('card-type').innerText = bancoLocal.tipo;
-    }
+    document.getElementById('card-type').innerText = (bancoLocal && bancoLocal.tipo) ? bancoLocal.tipo : '-';
 
     if (esNaranja) {
         document.getElementById('card-naranja').innerHTML = `<span style="color:#ef4444; font-weight:800;">🍊 SÍ: ${bancoLocal.tipoNaranja}</span>`;
@@ -657,6 +679,7 @@ function analizarTarjeta() {
         document.getElementById('card-naranja').innerHTML = '<span style="color:#22c55e; font-weight:bold;">No (Habilitada)</span>';
     }
 
+    // 2. Reglas Movi
     const regla = evaluarReglasMovi(clean, esNaranja);
     if (regla) {
         alertBox.style.display = 'block';
@@ -670,6 +693,7 @@ function analizarTarjeta() {
         alertBox.style.display = 'none';
     }
 
+    // 3. Algoritmo Luhn
     if (clean.length >= 13) {
         document.getElementById('card-luhn').innerHTML = luhnCheck(clean) 
             ? '<span style="color:#22c55e; font-weight:bold;">✅ VÁLIDA</span>' 
@@ -678,37 +702,40 @@ function analizarTarjeta() {
         document.getElementById('card-luhn').innerText = 'Incompleta...';
     }
 
-    if (clean.length >= 6 && (!bancoLocal || bancoLocal.banco !== 'BANCO SUPERVIELLE SA')) {
+    // 4. Si la base local ya lo identificó, asignamos país y NO dejamos que la API externa sobreescriba
+    if (bancoLocal) {
+        document.getElementById('card-country').innerText = 'Argentina';
+        return;
+    }
+
+    // 5. Solo consultar API internacional si NO existe en la base local
+    if (clean.length >= 6) {
         clearTimeout(timeoutBin);
         timeoutBin = setTimeout(async () => {
             try {
                 const res = await fetch(`/api/bin/${clean.substring(0, 8)}`);
                 const d = await res.json();
                 if (d.valido) {
-                    if (!bancoLocal) {
-                        const bUpper = (d.banco || '').toUpperCase();
-                        const esNaranjaApi = bUpper.includes('NARANJA') && !clean.startsWith('451772');
-                        
-                        document.getElementById('card-bank').innerText = d.banco;
-                        document.getElementById('card-type').innerText = d.tipo;
-                        document.getElementById('card-country').innerText = d.pais;
+                    const bUpper = (d.banco || '').toUpperCase();
+                    const esNaranjaApi = bUpper.includes('NARANJA') && !clean.startsWith('451772') && !clean.startsWith('433822');
+                    
+                    document.getElementById('card-bank').innerText = d.banco;
+                    document.getElementById('card-type').innerText = d.tipo || 'Desconocido';
+                    document.getElementById('card-country').innerText = d.pais || 'Desconocido';
 
-                        if (esNaranjaApi) {
-                            document.getElementById('card-naranja').innerHTML = '<span style="color:#ef4444; font-weight:800;">🍊 SÍ (Tarjeta Naranja)</span>';
-                            alertBox.style.display = 'block';
-                            alertBox.className = 'movi-status-box movi-rechazada';
-                            alertBox.innerText = '⛔ RECHAZADA: TARJETA NARANJA X NO PERMITIDA';
-                        }
+                    if (esNaranjaApi) {
+                        document.getElementById('card-naranja').innerHTML = '<span style="color:#ef4444; font-weight:800;">🍊 SÍ (Tarjeta Naranja)</span>';
+                        alertBox.style.display = 'block';
+                        alertBox.className = 'movi-status-box movi-rechazada';
+                        alertBox.innerText = '⛔ RECHAZADA: TARJETA NARANJA X NO PERMITIDA';
                     }
                 }
             } catch (e) {}
         }, 400);
-    } else if (bancoLocal && bancoLocal.banco === 'BANCO SUPERVIELLE SA') {
-        document.getElementById('card-country').innerText = 'Argentina';
     }
 }
 
-// 4. LÓGICA DE LA PLANILLA MOVISTAR
+// 4. PLANILLA MOVISTAR
 function armarTextoPlanilla() {
     const plan = document.getElementById('p-plan').value.trim();
     const cliente = document.getElementById('p-cliente').value.trim();
