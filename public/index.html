@@ -50,7 +50,7 @@
             transition: background 0.2s ease, color 0.2s ease;
         }
 
-        .container { max-width: 680px; margin: 10px auto; }
+        .container { max-width: 700px; margin: 10px auto; }
         .top-bar { display: flex; justify-content: flex-end; margin-bottom: 8px; }
         .btn-theme {
             background: var(--bg-card);
@@ -66,14 +66,14 @@
             margin: 0;
         }
 
-        .tabs { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; margin-bottom: 8px; }
+        .tabs { display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; margin-bottom: 8px; }
         .tab-btn { 
-            padding: 10px 2px; 
+            padding: 10px 1px; 
             border: none; 
             background: var(--tab-inactive); 
             color: var(--tab-inactive-text); 
             font-weight: bold; 
-            font-size: 12px; 
+            font-size: 11px; 
             border-radius: 6px 6px 0 0; 
             cursor: pointer; 
             text-align: center; 
@@ -178,6 +178,7 @@
         <button class="tab-btn active" id="btn-t1" onclick="verTab('tab-cuit')">👤 DNI/BCRA</button>
         <button class="tab-btn" id="btn-t2" onclick="verTab('tab-geo')">📍 Cobertura</button>
         <button class="tab-btn" id="btn-t3" onclick="verTab('tab-nollame')">🚫 No Llame</button>
+        <button class="tab-btn" id="btn-t6" onclick="verTab('tab-nosis')">🔍 Nosis</button>
         <button class="tab-btn" id="btn-t4" onclick="verTab('tab-tarjeta')">💳 Tarjetas</button>
         <button class="tab-btn" id="btn-t5" onclick="verTab('tab-planilla')">📋 Planilla</button>
     </div>
@@ -240,7 +241,22 @@
         </div>
     </div>
 
-    <!-- 4. VALIDADOR DE TARJETAS -->
+    <!-- 4. PESTAÑA NOSIS (NUEVA) -->
+    <div id="tab-nosis" class="card" style="display:none; padding: 12px;">
+        <h2>Consulta de Informe Nosis</h2>
+        <div style="display:flex; gap:8px; margin-bottom:10px;">
+            <input type="text" id="nosis-input" placeholder="DNI, CUIT o Nombre a consultar" style="margin-top:0;">
+            <button class="btn-sm btn-copy" style="white-space:nowrap;" onclick="copiarNosis()">Copiar y Buscar</button>
+        </div>
+        <div style="width: 100%; height: 520px; border-radius: 8px; overflow: hidden; border: 1px solid var(--border-color); background: white;">
+            <iframe id="frame-nosis" src="https://informes.nosis.com/" style="width: 100%; height: 100%; border: none;"></iframe>
+        </div>
+        <div style="display:flex; justify-content:flex-end; margin-top:8px;">
+            <a id="link-nosis-externo" href="https://informes.nosis.com/" target="_blank" style="font-size:13px; color:var(--primary); font-weight:bold; text-decoration:none;">Abrir Nosis en ventana completa ↗</a>
+        </div>
+    </div>
+
+    <!-- 5. VALIDADOR DE TARJETAS -->
     <div id="tab-tarjeta" class="card" style="display:none;">
         <h2>Validador de Tarjetas (Filtro Call Movi)</h2>
         <label>Número de Tarjeta: <span id="contador-digitos" class="counter-badge">0 dígitos</span></label>
@@ -261,7 +277,7 @@
         </div>
     </div>
 
-    <!-- 5. PLANILLA MOVISTAR -->
+    <!-- 6. PLANILLA MOVISTAR -->
     <div id="tab-planilla" class="card" style="display:none;">
         <h2>Armador de Planilla Movistar</h2>
         
@@ -338,7 +354,7 @@
 </div>
 
 <script>
-// Manejo de Modo Oscuro
+// Modo Oscuro
 function toggleTheme() {
     const isDark = document.body.classList.toggle('dark-mode');
     const btn = document.getElementById('theme-toggle');
@@ -356,13 +372,14 @@ if (localStorage.getItem('theme') === 'dark') {
 }
 
 function verTab(id) {
-    ['tab-cuit', 'tab-geo', 'tab-nollame', 'tab-tarjeta', 'tab-planilla'].forEach(t => document.getElementById(t).style.display = 'none');
-    ['btn-t1', 'btn-t2', 'btn-t3', 'btn-t4', 'btn-t5'].forEach(b => document.getElementById(b).classList.remove('active'));
+    ['tab-cuit', 'tab-geo', 'tab-nollame', 'tab-nosis', 'tab-tarjeta', 'tab-planilla'].forEach(t => document.getElementById(t).style.display = 'none');
+    ['btn-t1', 'btn-t2', 'btn-t3', 'btn-t6', 'btn-t4', 'btn-t5'].forEach(b => document.getElementById(b).classList.remove('active'));
     document.getElementById(id).style.display = 'block';
 
     if (id === 'tab-cuit') document.getElementById('btn-t1').classList.add('active');
     if (id === 'tab-geo') document.getElementById('btn-t2').classList.add('active');
     if (id === 'tab-nollame') document.getElementById('btn-t3').classList.add('active');
+    if (id === 'tab-nosis') document.getElementById('btn-t6').classList.add('active');
     if (id === 'tab-tarjeta') document.getElementById('btn-t4').classList.add('active');
     if (id === 'tab-planilla') document.getElementById('btn-t5').classList.add('active');
 }
@@ -370,6 +387,18 @@ function verTab(id) {
 function copiar(t) {
     navigator.clipboard.writeText(t);
     alert('Copiado: ' + t);
+}
+
+function irANosisConDato(val) {
+    copiar(val);
+    document.getElementById('nosis-input').value = val;
+    verTab('tab-nosis');
+}
+
+function copiarNosis() {
+    const v = document.getElementById('nosis-input').value.trim();
+    if (!v) return alert('Escribe un DNI o CUIT.');
+    copiar(v);
 }
 
 // 🟢 SITUACIÓN 1 = VERDE | 🟡 2,3,4 = AMARILLO | 🔴 5 = ROJO
@@ -485,9 +514,16 @@ async function consultarPersona() {
                     <button class="btn-sm btn-copy" onclick="copiar('${item.cuit}')">Copiar CUIT</button>
                 </div>
                 <div style="margin: 8px 0;"><strong>Nombre / Razón Social:</strong> <span style="color:var(--primary); font-weight:bold;">${denominacion || 'No informado en BCRA'}</span></div>
-                <a href="https://seti.afip.gob.ar/padron-puc-constancia-internet/ConsultaConstanciaAction.do" target="_blank" class="btn-arca" onclick="copiar('${item.cuit}')">
-                    🏛️ Abrir Constancia ARCA (Copia CUIT)
-                </a>
+                
+                <div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:6px;">
+                    <a href="https://seti.afip.gob.ar/padron-puc-constancia-internet/ConsultaConstanciaAction.do" target="_blank" class="btn-arca" onclick="copiar('${item.cuit}')">
+                        🏛️ Constancia ARCA
+                    </a>
+                    <button class="btn-sm" style="background:#4f46e5; color:white; margin-top:8px;" onclick="irANosisConDato('${item.cuit}')">
+                        🔍 Buscar en Nosis
+                    </button>
+                </div>
+
                 <div style="margin-top:12px; font-weight:bold;">Situación Crediticia en BCRA:</div>`;
 
             if (registros && registros.length > 0) {
@@ -574,42 +610,19 @@ function identificarMarca(n) {
     return 'Desconocida';
 }
 
-// Base de datos fija local de Bancos Argentinos (Prioridad Absoluta)
 function resolverBancoNacional(clean) {
-    // 1. BANCO SUPERVIELLE
-    if (/^433822/.test(clean)) {
-        return { banco: 'BANCO SUPERVIELLE S.A.', tipo: 'CRÉDITO (Visa)' };
-    }
-    if (/^451772/.test(clean)) {
-        return { banco: 'BANCO SUPERVIELLE S.A.', tipo: 'DÉBITO (Visa)' };
-    }
-    if (/^(451771|451770|450993|491410|450766|514931|525301|530060|540945|547631)/.test(clean)) {
-        return { banco: 'BANCO SUPERVIELLE S.A.', tipo: 'CRÉDITO' };
-    }
+    if (/^433822/.test(clean)) return { banco: 'BANCO SUPERVIELLE S.A.', tipo: 'CRÉDITO (Visa)' };
+    if (/^451772/.test(clean)) return { banco: 'BANCO SUPERVIELLE S.A.', tipo: 'DÉBITO (Visa)' };
+    if (/^(451771|451770|450993|491410|450766|514931|525301|530060|540945|547631)/.test(clean)) return { banco: 'BANCO SUPERVIELLE S.A.', tipo: 'CRÉDITO' };
 
-    // 2. BANCO NACIÓN ARGENTINA
-    if (/^520053/.test(clean)) {
-        return { banco: 'BANCO DE LA NACIÓN ARGENTINA', tipo: 'DÉBITO (Mastercard)' };
-    }
-    if (/^(451768|451769|402925|450974)/.test(clean)) {
-        return { banco: 'BANCO DE LA NACIÓN ARGENTINA', tipo: 'DÉBITO (Visa)' };
-    }
-    if (/^(540946|547632|514932)/.test(clean)) {
-        return { banco: 'BANCO DE LA NACIÓN ARGENTINA', tipo: 'CRÉDITO (Mastercard)' };
-    }
+    if (/^520053/.test(clean)) return { banco: 'BANCO DE LA NACIÓN ARGENTINA', tipo: 'DÉBITO (Mastercard)' };
+    if (/^(451768|451769|402925|450974)/.test(clean)) return { banco: 'BANCO DE LA NACIÓN ARGENTINA', tipo: 'DÉBITO (Visa)' };
+    if (/^(540946|547632|514932)/.test(clean)) return { banco: 'BANCO DE LA NACIÓN ARGENTINA', tipo: 'CRÉDITO (Mastercard)' };
 
-    // 3. TARJETA NARANJA X REAL
-    if (/^(5895|5896|5078)/.test(clean)) {
-        return { banco: 'TARJETA NARANJA SA', esNaranja: true, tipoNaranja: 'Tarjeta Naranja Propia (Crédito)', tipo: 'CRÉDITO' };
-    }
-    if (/^(450989|450990|450890|402374)/.test(clean)) {
-        return { banco: 'TARJETA NARANJA SA', esNaranja: true, tipoNaranja: 'Naranja X (Visa)', tipo: 'CRÉDITO / DÉBITO' };
-    }
-    if (/^(534484|543169)/.test(clean)) {
-        return { banco: 'TARJETA NARANJA SA', esNaranja: true, tipoNaranja: 'Naranja X (Mastercard)', tipo: 'DÉBITO / PREPAGA' };
-    }
+    if (/^(5895|5896|5078)/.test(clean)) return { banco: 'TARJETA NARANJA SA', esNaranja: true, tipoNaranja: 'Tarjeta Naranja Propia (Crédito)', tipo: 'CRÉDITO' };
+    if (/^(450989|450990|450890|402374)/.test(clean)) return { banco: 'TARJETA NARANJA SA', esNaranja: true, tipoNaranja: 'Naranja X (Visa)', tipo: 'CRÉDITO / DÉBITO' };
+    if (/^(534484|543169)/.test(clean)) return { banco: 'TARJETA NARANJA SA', esNaranja: true, tipoNaranja: 'Naranja X (Mastercard)', tipo: 'DÉBITO / PREPAGA' };
 
-    // 4. OTROS BANCOS PRINCIPALES
     if (/^(450770|450771|450772|402914|450849)/.test(clean)) return { banco: 'BANCO GALICIA', tipo: 'DÉBITO / CRÉDITO' };
     if (/^(450995|450996|451760|451761)/.test(clean)) return { banco: 'BANCO SANTANDER', tipo: 'DÉBITO / CRÉDITO' };
     if (/^(451754|451755|450970)/.test(clean)) return { banco: 'BBVA BANCO FRANCÉS', tipo: 'DÉBITO / CRÉDITO' };
@@ -619,7 +632,6 @@ function resolverBancoNacional(clean) {
     return null;
 }
 
-// Reglas de exclusión del Call Movi
 function evaluarReglasMovi(clean, esNaranja) {
     if (esNaranja) return { status: 'RECHAZADA', msg: '⛔ RECHAZADA: TARJETA NARANJA X NO PERMITIDA' };
     if (/^(60|65|63)/.test(clean)) return { status: 'RECHAZADA', msg: '⛔ RECHAZADA: Comienza con 60, 65 o 63 (No la toma T3 / Cabal Débito)' };
@@ -665,7 +677,6 @@ function analizarTarjeta() {
 
     document.getElementById('card-brand').innerText = identificarMarca(clean);
 
-    // 1. Revisión prioritaria en Base Argentina local
     const bancoLocal = resolverBancoNacional(clean);
     let esNaranja = Boolean(bancoLocal && bancoLocal.esNaranja);
     let nombreBanco = bancoLocal ? bancoLocal.banco : '-';
@@ -679,7 +690,6 @@ function analizarTarjeta() {
         document.getElementById('card-naranja').innerHTML = '<span style="color:#22c55e; font-weight:bold;">No (Habilitada)</span>';
     }
 
-    // 2. Reglas Movi
     const regla = evaluarReglasMovi(clean, esNaranja);
     if (regla) {
         alertBox.style.display = 'block';
@@ -693,7 +703,6 @@ function analizarTarjeta() {
         alertBox.style.display = 'none';
     }
 
-    // 3. Algoritmo Luhn
     if (clean.length >= 13) {
         document.getElementById('card-luhn').innerHTML = luhnCheck(clean) 
             ? '<span style="color:#22c55e; font-weight:bold;">✅ VÁLIDA</span>' 
@@ -702,13 +711,11 @@ function analizarTarjeta() {
         document.getElementById('card-luhn').innerText = 'Incompleta...';
     }
 
-    // 4. Si la base local ya lo identificó, asignamos país y NO dejamos que la API externa sobreescriba
     if (bancoLocal) {
         document.getElementById('card-country').innerText = 'Argentina';
         return;
     }
 
-    // 5. Solo consultar API internacional si NO existe en la base local
     if (clean.length >= 6) {
         clearTimeout(timeoutBin);
         timeoutBin = setTimeout(async () => {
@@ -735,7 +742,7 @@ function analizarTarjeta() {
     }
 }
 
-// 4. PLANILLA MOVISTAR
+// 5. PLANILLA MOVISTAR
 function armarTextoPlanilla() {
     const plan = document.getElementById('p-plan').value.trim();
     const cliente = document.getElementById('p-cliente').value.trim();
