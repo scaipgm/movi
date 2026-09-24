@@ -241,19 +241,17 @@
         </div>
     </div>
 
-    <!-- 4. PESTAÑA NOSIS (NUEVA) -->
-    <div id="tab-nosis" class="card" style="display:none; padding: 12px;">
-        <h2>Consulta de Informe Nosis</h2>
-        <div style="display:flex; gap:8px; margin-bottom:10px;">
-            <input type="text" id="nosis-input" placeholder="DNI, CUIT o Nombre a consultar" style="margin-top:0;">
-            <button class="btn-sm btn-copy" style="white-space:nowrap;" onclick="copiarNosis()">Copiar y Buscar</button>
-        </div>
-        <div style="width: 100%; height: 520px; border-radius: 8px; overflow: hidden; border: 1px solid var(--border-color); background: white;">
-            <iframe id="frame-nosis" src="https://informes.nosis.com/" style="width: 100%; height: 100%; border: none;"></iframe>
-        </div>
-        <div style="display:flex; justify-content:flex-end; margin-top:8px;">
-            <a id="link-nosis-externo" href="https://informes.nosis.com/" target="_blank" style="font-size:13px; color:var(--primary); font-weight:bold; text-decoration:none;">Abrir Nosis en ventana completa ↗</a>
-        </div>
+    <!-- 4. PESTAÑA NOSIS (SIN IFRAME) -->
+    <div id="tab-nosis" class="card" style="display:none; padding: 25px;">
+        <h2>Acceso Rápido a Nosis</h2>
+        <p style="font-size:14px; color:var(--text-muted); text-align:center; margin-bottom:20px;">Nosis restringe las conexiones incrustadas. Ingresa el DNI o CUIT, copialo y abre Nosis Oficial en una nueva pestaña para consultar.</p>
+        
+        <label>DNI, CUIT o Nombre a consultar:</label>
+        <input type="text" id="nosis-input" placeholder="Ej: 45140633">
+        
+        <button class="btn-submit" style="background:#4f46e5; margin-top:15px;" onclick="abrirNosisDirecto()">
+            🔍 Copiar Datos y Abrir Nosis
+        </button>
     </div>
 
     <!-- 5. VALIDADOR DE TARJETAS -->
@@ -389,16 +387,20 @@ function copiar(t) {
     alert('Copiado: ' + t);
 }
 
+// Acción Rápida Nosis
 function irANosisConDato(val) {
-    copiar(val);
     document.getElementById('nosis-input').value = val;
     verTab('tab-nosis');
+    abrirNosisDirecto();
 }
 
-function copiarNosis() {
+function abrirNosisDirecto() {
     const v = document.getElementById('nosis-input').value.trim();
-    if (!v) return alert('Escribe un DNI o CUIT.');
-    copiar(v);
+    if (!v) return alert('Escribe un DNI o CUIT primero.');
+    navigator.clipboard.writeText(v).then(() => {
+        alert('Copiado: ' + v + '\nSe abrirá Nosis. Solo pega el dato para buscar.');
+        window.open('https://informes.nosis.com/', '_blank');
+    });
 }
 
 // 🟢 SITUACIÓN 1 = VERDE | 🟡 2,3,4 = AMARILLO | 🔴 5 = ROJO
