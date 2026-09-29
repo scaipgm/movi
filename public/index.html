@@ -135,7 +135,7 @@
         .movi-aprobada { background: #dcfce7; border: 2px solid #22c55e; color: #166534; }
         .movi-alerta { background: #fef9c3; border: 2px solid #eab308; color: #854d0e; }
 
-        /* Estilos Centrales con los colores solicitados */
+        /* Estilos Centrales */
         .central-card {
             background: var(--item-bg);
             border: 1px solid var(--border-color);
@@ -143,15 +143,12 @@
             padding: 14px;
             margin-top: 10px;
         }
-        /* Crítica = Verde */
         .banner-critica { background: #dcfce7; border: 2px solid #22c55e; color: #166534; }
         .tag-critica { background: #dcfce7; color: #166534; border: 1px solid #22c55e; padding: 4px 8px; border-radius: 4px; font-weight: 800; font-size: 12px; }
 
-        /* Común (Masiva) = Amarillo */
         .banner-comun { background: #fef9c3; border: 2px solid #eab308; color: #854d0e; }
         .tag-comun { background: #fef9c3; color: #854d0e; border: 1px solid #eab308; padding: 4px 8px; border-radius: 4px; font-weight: 800; font-size: 12px; }
 
-        /* Inbound = Central D */
         .banner-central-d { background: #e0f2fe; border: 2px solid #38bdf8; color: #075985; }
         .tag-central-d { background: #e0f2fe; color: #075985; border: 1px solid #38bdf8; padding: 4px 8px; border-radius: 4px; font-weight: 800; font-size: 12px; }
 
@@ -224,7 +221,7 @@
         <div id="out-persona"></div>
     </div>
 
-    <!-- 2. PESTAÑA: BUSCADOR DE CENTRALES (CRÍTICA VERDE, COMÚN AMARILLO, CENTRAL D) -->
+    <!-- 2. PESTAÑA: BUSCADOR DE CENTRALES -->
     <div id="tab-centrales" class="card" style="display:none;">
         <h2>Buscador de Centrales</h2>
         <label>Nombre de la Central, Ciudad o Localidad:</label>
@@ -285,7 +282,7 @@
         </button>
     </div>
 
-    <!-- 6. VALIDADOR DE TARJETAS -->
+    <!-- 6. VALIDADOR DE TARJETAS (REGLA: CRÉDITOS TODAS APROBADAS) -->
     <div id="tab-tarjeta" class="card" style="display:none;">
         <h2>Validador de Tarjetas (Filtro Call Movi)</h2>
         <label>Número de Tarjeta: <span id="contador-digitos" class="counter-badge">0 dígitos</span></label>
@@ -587,7 +584,7 @@ function buscarCentral() {
     const stats = document.getElementById('central-stats');
 
     if (!q) {
-        cont.innerHTML = '<p style="color:var(--text-muted); text-align:center; margin-top:20px;">Escribe el nombre de una central arriba para ver si es Crítica (Verde), Común (Amarillo) o Central D (Azul).</p>';
+        cont.innerHTML = '<p style="color:var(--text-muted); text-align:center; margin-top:20px;">Escribe el nombre de una central arriba para ver su clasificación.</p>';
         stats.innerText = '';
         return;
     }
@@ -620,21 +617,18 @@ function buscarCentral() {
         let badgeTexto = '';
 
         if (esCritica) {
-            // Crítica = Verde
             cartel = `<div class="movi-status-box banner-critica" style="margin-bottom:8px; font-size:15px;">
-                🟢 ALTA COMPE / CENTRAL CRÍTICA (Aplicar Oferta Crítica)
+                🟢 ALTA COMPE / CRÍTICA (Aplicar Oferta Crítica)
             </div>`;
             badgeClass = 'tag-critica';
             badgeTexto = 'CRÍTICA';
         } else if (esCentralD) {
-            // Inbound = Central D (Azul)
             cartel = `<div class="movi-status-box banner-central-d" style="margin-bottom:8px; font-size:15px;">
                 🔵 CENTRAL D
             </div>`;
             badgeClass = 'tag-central-d';
             badgeTexto = 'CENTRAL D';
         } else {
-            // Común / Masiva = Amarillo
             cartel = `<div class="movi-status-box banner-comun" style="margin-bottom:8px; font-size:15px;">
                 🟡 COMÚN / OFERTA MASIVA (Grilla Masiva Estándar)
             </div>`;
@@ -919,29 +913,51 @@ function identificarMarca(n) {
 }
 
 function resolverBancoNacional(clean) {
-    if (/^433822/.test(clean)) return { banco: 'BANCO SUPERVIELLE S.A.', tipo: 'CRÉDITO (Visa)' };
-    if (/^451772/.test(clean)) return { banco: 'BANCO SUPERVIELLE S.A.', tipo: 'DÉBITO (Visa)' };
-    if (/^(451771|451770|450993|491410|450766|514931|525301|530060|540945|547631)/.test(clean)) return { banco: 'BANCO SUPERVIELLE S.A.', tipo: 'CRÉDITO' };
+    // 1. BANCO SUPERVIELLE
+    if (/^433822/.test(clean)) return { banco: 'BANCO SUPERVIELLE S.A.', tipo: 'CRÉDITO (Visa)', esCredito: true };
+    if (/^451772/.test(clean)) return { banco: 'BANCO SUPERVIELLE S.A.', tipo: 'DÉBITO (Visa)', esCredito: false };
+    if (/^(451771|451770|450993|491410|450766|514931|525301|530060|540945|547631)/.test(clean)) return { banco: 'BANCO SUPERVIELLE S.A.', tipo: 'CRÉDITO', esCredito: true };
 
-    if (/^520053/.test(clean)) return { banco: 'BANCO DE LA NACIÓN ARGENTINA', tipo: 'DÉBITO (Mastercard)' };
-    if (/^(451768|451769|402925|450974)/.test(clean)) return { banco: 'BANCO DE LA NACIÓN ARGENTINA', tipo: 'DÉBITO (Visa)' };
-    if (/^(540946|547632|514932)/.test(clean)) return { banco: 'BANCO DE LA NACIÓN ARGENTINA', tipo: 'CRÉDITO (Mastercard)' };
+    // 2. BANCO NACIÓN ARGENTINA
+    if (/^520053/.test(clean)) return { banco: 'BANCO DE LA NACIÓN ARGENTINA', tipo: 'DÉBITO (Mastercard)', esCredito: false };
+    if (/^(451768|451769|402925|450974)/.test(clean)) return { banco: 'BANCO DE LA NACIÓN ARGENTINA', tipo: 'DÉBITO (Visa)', esCredito: false };
+    if (/^(540946|547632|514932)/.test(clean)) return { banco: 'BANCO DE LA NACIÓN ARGENTINA', tipo: 'CRÉDITO (Mastercard)', esCredito: true };
 
-    if (/^(5895|5896|5078)/.test(clean)) return { banco: 'TARJETA NARANJA SA', esNaranja: true, tipoNaranja: 'Tarjeta Naranja Propia (Crédito)', tipo: 'CRÉDITO' };
-    if (/^(450989|450990|450890|402374)/.test(clean)) return { banco: 'TARJETA NARANJA SA', esNaranja: true, tipoNaranja: 'Naranja X (Visa)', tipo: 'CRÉDITO / DÉBITO' };
-    if (/^(534484|543169)/.test(clean)) return { banco: 'TARJETA NARANJA SA', esNaranja: true, tipoNaranja: 'Naranja X (Mastercard)', tipo: 'DÉBITO / PREPAGA' };
+    // 3. TARJETA NARANJA REAL:
+    // 5895, 5896 y 5078 SON CRÉDITO NARANJA -> HABILITADA
+    if (/^(5895|5896|5078)/.test(clean)) {
+        return { banco: 'TARJETA NARANJA SA', esNaranja: true, tipoNaranja: 'Tarjeta Naranja Propia (Crédito)', tipo: 'CRÉDITO', esCredito: true };
+    }
+    if (/^(450989|450990|450890|402374)/.test(clean)) {
+        return { banco: 'TARJETA NARANJA SA', esNaranja: true, tipoNaranja: 'Naranja X (Visa Crédito)', tipo: 'CRÉDITO', esCredito: true };
+    }
+    // Naranja Débito / Prepaga Digital (Rechazada)
+    if (/^(534484|543169)/.test(clean)) {
+        return { banco: 'TARJETA NARANJA SA', esNaranja: true, tipoNaranja: 'Naranja X (Mastercard Débito / Prepaga)', tipo: 'DÉBITO / PREPAGA', esCredito: false };
+    }
 
-    if (/^(450770|450771|450772|402914|450849)/.test(clean)) return { banco: 'BANCO GALICIA', tipo: 'DÉBITO / CRÉDITO' };
-    if (/^(450995|450996|451760|451761)/.test(clean)) return { banco: 'BANCO SANTANDER', tipo: 'DÉBITO / CRÉDITO' };
-    if (/^(451754|451755|450970)/.test(clean)) return { banco: 'BBVA BANCO FRANCÉS', tipo: 'DÉBITO / CRÉDITO' };
-    if (/^(451764|451765|450992)/.test(clean)) return { banco: 'BANCO MACRO', tipo: 'DÉBITO / CRÉDITO' };
-    if (/^(451758|451759)/.test(clean)) return { banco: 'BANCO PROVINCIA DE BS AS', tipo: 'DÉBITO / CRÉDITO' };
+    if (/^(450770|450771|450772|402914|450849)/.test(clean)) return { banco: 'BANCO GALICIA', tipo: 'DÉBITO / CRÉDITO', esCredito: null };
+    if (/^(450995|450996|451760|451761)/.test(clean)) return { banco: 'BANCO SANTANDER', tipo: 'DÉBITO / CRÉDITO', esCredito: null };
+    if (/^(451754|451755|450970)/.test(clean)) return { banco: 'BBVA BANCO FRANCÉS', tipo: 'DÉBITO / CRÉDITO', esCredito: null };
+    if (/^(451764|451765|450992)/.test(clean)) return { banco: 'BANCO MACRO', tipo: 'DÉBITO / CRÉDITO', esCredito: null };
+    if (/^(451758|451759)/.test(clean)) return { banco: 'BANCO PROVINCIA DE BS AS', tipo: 'DÉBITO / CRÉDITO', esCredito: null };
 
     return null;
 }
 
-function evaluarReglasMovi(clean, esNaranja) {
-    if (esNaranja) return { status: 'RECHAZADA', msg: '⛔ RECHAZADA: TARJETA NARANJA X NO PERMITIDA' };
+// Evaluación de reglas de Movi
+function evaluarReglasMovi(clean, esNaranja, esCredito) {
+    // REGLA FUNDAMENTAL: SI ES CRÉDITO, ESTÁ PERMITIDA (INCLUSO NARANJA CRÉDITO)
+    if (esCredito === true) {
+        return { status: 'APROBADA', msg: '✅ PRE-APROBADA: Tarjeta de Crédito habilitada en sistema Movi' };
+    }
+
+    // SI ES NARANJA PERO NO ES CRÉDITO (ES DÉBITO O PREPAGA DIGITAL), SE RECHAZA
+    if (esNaranja && esCredito === false) {
+        return { status: 'RECHAZADA', msg: '⛔ RECHAZADA: TARJETA NARANJA X DÉBITO / PREPAGA NO PERMITIDA' };
+    }
+
+    // Lista negra estricta de débitos / entidades digitales
     if (/^(60|65|63)/.test(clean)) return { status: 'RECHAZADA', msg: '⛔ RECHAZADA: Comienza con 60, 65 o 63 (No la toma T3 / Cabal Débito)' };
     if (/^5258|^5577/.test(clean)) return { status: 'RECHAZADA', msg: '⛔ RECHAZADA: Tarjeta UALÁ (Entidad digital)' };
     if (/^5547/.test(clean)) return { status: 'RECHAZADA', msg: '⛔ RECHAZADA: MERCADO PAGO (Entidad digital)' };
@@ -961,6 +977,7 @@ function evaluarReglasMovi(clean, esNaranja) {
     if (/^4549/.test(clean)) return { status: 'RECHAZADA', msg: '⛔ RECHAZADA: BANCO SOL' };
     if (/^5591/.test(clean)) return { status: 'RECHAZADA', msg: '⛔ RECHAZADA: CENCOPLAY' };
     if (/^4576/.test(clean)) return { status: 'ALERTA', msg: '⚠️ ATENCIÓN: 4576 - Requiere EFECTIVO SÍ' };
+
     return null;
 }
 
@@ -987,21 +1004,26 @@ function analizarTarjeta() {
 
     const bancoLocal = resolverBancoNacional(clean);
     let esNaranja = Boolean(bancoLocal && bancoLocal.esNaranja);
+    let esCredito = bancoLocal ? bancoLocal.esCredito : null;
     let nombreBanco = bancoLocal ? bancoLocal.banco : '-';
 
     document.getElementById('card-bank').innerText = nombreBanco;
     document.getElementById('card-type').innerText = (bancoLocal && bancoLocal.tipo) ? bancoLocal.tipo : '-';
 
     if (esNaranja) {
-        document.getElementById('card-naranja').innerHTML = `<span style="color:#ef4444; font-weight:800;">🍊 SÍ: ${bancoLocal.tipoNaranja}</span>`;
+        if (esCredito === true) {
+            document.getElementById('card-naranja').innerHTML = `<span style="color:#22c55e; font-weight:800;">🍊 SÍ: ${bancoLocal.tipoNaranja} (HABILITADA)</span>`;
+        } else {
+            document.getElementById('card-naranja').innerHTML = `<span style="color:#ef4444; font-weight:800;">🍊 SÍ: ${bancoLocal.tipoNaranja} (RECHAZADA)</span>`;
+        }
     } else {
         document.getElementById('card-naranja').innerHTML = '<span style="color:#22c55e; font-weight:bold;">No (Habilitada)</span>';
     }
 
-    const regla = evaluarReglasMovi(clean, esNaranja);
+    const regla = evaluarReglasMovi(clean, esNaranja, esCredito);
     if (regla) {
         alertBox.style.display = 'block';
-        alertBox.className = 'movi-status-box ' + (regla.status === 'RECHAZADA' ? 'movi-rechazada' : 'movi-alerta');
+        alertBox.className = 'movi-status-box ' + (regla.status === 'RECHAZADA' ? 'movi-rechazada' : (regla.status === 'APROBADA' ? 'movi-aprobada' : 'movi-alerta'));
         alertBox.innerText = regla.msg;
     } else if (clean.length >= 6) {
         alertBox.style.display = 'block';
@@ -1032,17 +1054,23 @@ function analizarTarjeta() {
                 const d = await res.json();
                 if (d.valido) {
                     const bUpper = (d.banco || '').toUpperCase();
-                    const esNaranjaApi = bUpper.includes('NARANJA') && !clean.startsWith('451772') && !clean.startsWith('433822');
+                    const tUpper = (d.tipo || '').toUpperCase();
+                    const esCreditoApi = tUpper.includes('CREDIT') || tUpper.includes('CRÉDITO');
+                    const esNaranjaApi = bUpper.includes('NARANJA');
                     
                     document.getElementById('card-bank').innerText = d.banco;
                     document.getElementById('card-type').innerText = d.tipo || 'Desconocido';
                     document.getElementById('card-country').innerText = d.pais || 'Desconocido';
 
-                    if (esNaranjaApi) {
-                        document.getElementById('card-naranja').innerHTML = '<span style="color:#ef4444; font-weight:800;">🍊 SÍ (Tarjeta Naranja)</span>';
+                    if (esCreditoApi) {
+                        alertBox.style.display = 'block';
+                        alertBox.className = 'movi-status-box movi-aprobada';
+                        alertBox.innerText = '✅ PRE-APROBADA: Tarjeta de Crédito habilitada en sistema Movi';
+                    } else if (esNaranjaApi) {
+                        document.getElementById('card-naranja').innerHTML = '<span style="color:#ef4444; font-weight:800;">🍊 SÍ (Tarjeta Naranja Débito)</span>';
                         alertBox.style.display = 'block';
                         alertBox.className = 'movi-status-box movi-rechazada';
-                        alertBox.innerText = '⛔ RECHAZADA: TARJETA NARANJA X NO PERMITIDA';
+                        alertBox.innerText = '⛔ RECHAZADA: TARJETA NARANJA DÉBITO / PREPAGA NO PERMITIDA';
                     }
                 }
             } catch (e) {}
