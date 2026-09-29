@@ -135,7 +135,7 @@
         .movi-aprobada { background: #dcfce7; border: 2px solid #22c55e; color: #166534; }
         .movi-alerta { background: #fef9c3; border: 2px solid #eab308; color: #854d0e; }
 
-        /* Estilos Centrales */
+        /* Estilos Centrales con los colores solicitados */
         .central-card {
             background: var(--item-bg);
             border: 1px solid var(--border-color);
@@ -143,9 +143,17 @@
             padding: 14px;
             margin-top: 10px;
         }
-        .tag-critica { background: #fee2e2; color: #991b1b; border: 1px solid #ef4444; padding: 4px 8px; border-radius: 4px; font-weight: 800; font-size: 12px; }
-        .tag-masiva { background: #dcfce7; color: #166534; border: 1px solid #22c55e; padding: 4px 8px; border-radius: 4px; font-weight: 800; font-size: 12px; }
-        .tag-inbound { background: #e0f2fe; color: #075985; border: 1px solid #38bdf8; padding: 4px 8px; border-radius: 4px; font-weight: 800; font-size: 12px; }
+        /* Crítica = Verde */
+        .banner-critica { background: #dcfce7; border: 2px solid #22c55e; color: #166534; }
+        .tag-critica { background: #dcfce7; color: #166534; border: 1px solid #22c55e; padding: 4px 8px; border-radius: 4px; font-weight: 800; font-size: 12px; }
+
+        /* Común (Masiva) = Amarillo */
+        .banner-comun { background: #fef9c3; border: 2px solid #eab308; color: #854d0e; }
+        .tag-comun { background: #fef9c3; color: #854d0e; border: 1px solid #eab308; padding: 4px 8px; border-radius: 4px; font-weight: 800; font-size: 12px; }
+
+        /* Inbound = Central D */
+        .banner-central-d { background: #e0f2fe; border: 2px solid #38bdf8; color: #075985; }
+        .tag-central-d { background: #e0f2fe; color: #075985; border: 1px solid #38bdf8; padding: 4px 8px; border-radius: 4px; font-weight: 800; font-size: 12px; }
 
         .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .preview-box {
@@ -216,9 +224,9 @@
         <div id="out-persona"></div>
     </div>
 
-    <!-- 2. NUEVA PESTAÑA: BUSCADOR DE CENTRALES (ALTA COMPE / CRÍTICA / MASIVA) -->
+    <!-- 2. PESTAÑA: BUSCADOR DE CENTRALES (CRÍTICA VERDE, COMÚN AMARILLO, CENTRAL D) -->
     <div id="tab-centrales" class="card" style="display:none;">
-        <h2>Buscador de Centrales (Alta Compe / Normal)</h2>
+        <h2>Buscador de Centrales</h2>
         <label>Nombre de la Central, Ciudad o Localidad:</label>
         <input type="text" id="central-search" placeholder="Ej: Dorrego, Las Heras, Adrogue, Berisso, Junin..." oninput="buscarCentral()" autofocus>
 
@@ -383,11 +391,11 @@ const BASE_CENTRALES = [
   { nombre: "ALEJANDRO KORN", cod: "7", tipo: "MASIVA", compe: "AMBA", prov: "BUENOS AIRES", loc: "ALEJANDRO KORN", dep: "SAN VICENTE", zona: "Sur 1" },
   { nombre: "AVELLANEDA I", cod: "20", tipo: "MASIVA", compe: "AMBA", prov: "BUENOS AIRES", loc: "DOCK SUD", dep: "AVELLANEDA", zona: "Sur 2" },
   { nombre: "AYACUCHO", cod: "22", tipo: "MASIVA", compe: "AMBA", prov: "BUENOS AIRES", loc: "AYACUCHO", dep: "AYACUCHO", zona: "CABA" },
-  { nombre: "BAHIA BLANCA I", cod: "25", tipo: "INBOUND", compe: "INBOUND", prov: "BUENOS AIRES", loc: "BAHIA BLANCA", dep: "BAHIA BLANCA", zona: "RESTO PATAGONIA" },
-  { nombre: "GENERAL D CERRI II", cod: "26", tipo: "INBOUND", compe: "INBOUND", prov: "BUENOS AIRES", loc: "GENERAL D CERRI", dep: "BAHIA BLANCA", zona: "RESTO PATAGONIA" },
-  { nombre: "INGENIERO WHITE", cod: "27", tipo: "INBOUND", compe: "INBOUND", prov: "BUENOS AIRES", loc: "BAHIA BLANCA", dep: "BAHIA BLANCA", zona: "RESTO PATAGONIA" },
-  { nombre: "INDEPENDENCIA I", cod: "28", tipo: "INBOUND", compe: "INBOUND", prov: "BUENOS AIRES", loc: "BAHIA BLANCA", dep: "BAHIA BLANCA", zona: "RESTO PATAGONIA" },
-  { nombre: "PATAGONIA", cod: "29", tipo: "INBOUND", compe: "INBOUND", prov: "BUENOS AIRES", loc: "BAHIA BLANCA", dep: "BAHIA BLANCA", zona: "BAHIA BLANCA" },
+  { nombre: "BAHIA BLANCA I", cod: "25", tipo: "CENTRAL D", compe: "CENTRAL D", prov: "BUENOS AIRES", loc: "BAHIA BLANCA", dep: "BAHIA BLANCA", zona: "RESTO PATAGONIA" },
+  { nombre: "GENERAL D CERRI II", cod: "26", tipo: "CENTRAL D", compe: "CENTRAL D", prov: "BUENOS AIRES", loc: "GENERAL D CERRI", dep: "BAHIA BLANCA", zona: "RESTO PATAGONIA" },
+  { nombre: "INGENIERO WHITE", cod: "27", tipo: "CENTRAL D", compe: "CENTRAL D", prov: "BUENOS AIRES", loc: "BAHIA BLANCA", dep: "BAHIA BLANCA", zona: "RESTO PATAGONIA" },
+  { nombre: "INDEPENDENCIA I", cod: "28", tipo: "CENTRAL D", compe: "CENTRAL D", prov: "BUENOS AIRES", loc: "BAHIA BLANCA", dep: "BAHIA BLANCA", zona: "RESTO PATAGONIA" },
+  { nombre: "PATAGONIA", cod: "29", tipo: "CENTRAL D", compe: "CENTRAL D", prov: "BUENOS AIRES", loc: "BAHIA BLANCA", dep: "BAHIA BLANCA", zona: "BAHIA BLANCA" },
   { nombre: "BALCARCE I", cod: "32", tipo: "MASIVA", compe: "RESTO", prov: "BUENOS AIRES", loc: "BALCARCE", dep: "BALCARCE", zona: "RESTO PBA" },
   { nombre: "BANFIELD I", cod: "34", tipo: "MASIVA", compe: "AMBA", prov: "BUENOS AIRES", loc: "BANFIELD", dep: "LOMAS DE ZAMORA", zona: "Sur 1" },
   { nombre: "BELLA VISTA I", cod: "44", tipo: "MASIVA", compe: "AMBA", prov: "BUENOS AIRES", loc: "BELLA VISTA GBA", dep: "SAN MIGUEL", zona: "AMBA NORTE" },
@@ -403,7 +411,7 @@ const BASE_CENTRALES = [
   { nombre: "CHASCOMUS I", cod: "85", tipo: "MASIVA", compe: "AMBA", prov: "BUENOS AIRES", loc: "CHASCOMUS", dep: "BUENOS AIRES", zona: "LA PLATA" },
   { nombre: "CHIVILCOY I", cod: "88", tipo: "MASIVA", compe: "RESTO", prov: "BUENOS AIRES", loc: "CHIVILCOY", dep: "CHIVILCOY", zona: "FIBRASTAR" },
   
-  // CRÍTICAS BUENOS AIRES
+  // CRÍTICAS BUENOS AIRES (VERDE)
   { nombre: "CORONEL BRANDSEN", cod: "106", tipo: "CRITICA", compe: "ALTA COMPE", prov: "BUENOS AIRES", loc: "CORONEL BRANDSEN", dep: "CORONEL BRANDSEN", zona: "LA PLATA" },
   { nombre: "CORONEL PRINGLES", cod: "110", tipo: "CRITICA", compe: "ALTA COMPE", prov: "BUENOS AIRES", loc: "CORONEL PRINGLES", dep: "CORONEL PRINGLES", zona: "RESTO PATAGONIA" },
   { nombre: "CORONEL SUAREZ I", cod: "111", tipo: "MASIVA", compe: "RESTO", prov: "BUENOS AIRES", loc: "CORONEL SUAREZ", dep: "CORONEL SUAREZ", zona: "BAHIA BLANCA" },
@@ -411,32 +419,32 @@ const BASE_CENTRALES = [
   { nombre: "DOLORES", cod: "122", tipo: "CRITICA", compe: "ALTA COMPE", prov: "BUENOS AIRES", loc: "DOLORES", dep: "DOLORES", zona: "LA PLATA" },
   { nombre: "EL ROCIO I", cod: "127", tipo: "MASIVA", compe: "AMBA", prov: "BUENOS AIRES", loc: "BOSQUES", dep: "FLORENCIO VARELA", zona: "Sur 2" },
   { nombre: "EZEIZA I", cod: "132", tipo: "MASIVA", compe: "AMBA", prov: "BUENOS AIRES", loc: "EZEIZA", dep: "EZEIZA", zona: "Sur 1" },
-  { nombre: "FLORENCIO VARELA I", cod: "135", tipo: "INBOUND", compe: "INBOUND", prov: "BUENOS AIRES", loc: "FLORENCIO VARELA", dep: "FLORENCIO VARELA", zona: "SUR 2" },
+  { nombre: "FLORENCIO VARELA I", cod: "135", tipo: "CENTRAL D", compe: "CENTRAL D", prov: "BUENOS AIRES", loc: "FLORENCIO VARELA", dep: "FLORENCIO VARELA", zona: "SUR 2" },
   { nombre: "FRANCISCO ALVAREZ", cod: "139", tipo: "MASIVA", compe: "AMBA", prov: "BUENOS AIRES", loc: "FRANCISCO ALVAREZ", dep: "MORENO", zona: "OESTE 1" },
   { nombre: "F SOLANO I", cod: "141", tipo: "MASIVA", compe: "AMBA", prov: "BUENOS AIRES", loc: "QUILMES OESTE", dep: "QUILMES", zona: "SUR 2" },
   { nombre: "GENERAL MADARIAGA", cod: "158", tipo: "CRITICA", compe: "ALTA COMPE", prov: "BUENOS AIRES", loc: "GENERAL MADARIAGA", dep: "DOLORES", zona: "RESTO PBA" },
   { nombre: "GENERAL RODRIGUEZ I", cod: "163", tipo: "MASIVA", compe: "AMBA", prov: "BUENOS AIRES", loc: "GENERAL RODRIGUEZ", dep: "PILAR", zona: "Oeste 1" },
   { nombre: "GLEW I", cod: "164", tipo: "MASIVA", compe: "AMBA", prov: "BUENOS AIRES", loc: "GLEW", dep: "EZEIZA", zona: "Sur 1" },
-  { nombre: "GONZALEZ CATAN I", cod: "167", tipo: "INBOUND", compe: "INBOUND", prov: "BUENOS AIRES", loc: "GONZALEZ CATAN", dep: "LA MATANZA", zona: "Oeste 2" },
-  { nombre: "LAFERRERE I", cod: "168", tipo: "INBOUND", compe: "INBOUND", prov: "BUENOS AIRES", loc: "GREGORIO DE LAFERRERE", dep: "LA MATANZA", zona: "OESTE 2" },
+  { nombre: "GONZALEZ CATAN I", cod: "167", tipo: "CENTRAL D", compe: "CENTRAL D", prov: "BUENOS AIRES", loc: "GONZALEZ CATAN", dep: "LA MATANZA", zona: "Oeste 2" },
+  { nombre: "LAFERRERE I", cod: "168", tipo: "CENTRAL D", compe: "CENTRAL D", prov: "BUENOS AIRES", loc: "GREGORIO DE LAFERRERE", dep: "LA MATANZA", zona: "OESTE 2" },
   { nombre: "GUERNICA I", cod: "172", tipo: "MASIVA", compe: "AMBA", prov: "BUENOS AIRES", loc: "GUERNICA", dep: "GUERNICA", zona: "Sur 1" },
   { nombre: "HAEDO I", cod: "173", tipo: "MASIVA", compe: "AMBA", prov: "BUENOS AIRES", loc: "HAEDO", dep: "MORÓN", zona: "Oeste 2" },
   { nombre: "HURLINGHAM I", cod: "181", tipo: "MASIVA", compe: "AMBA", prov: "BUENOS AIRES", loc: "HURLINGHAM", dep: "HURLINGHAM", zona: "AMBA NORTE" },
-  { nombre: "ISIDRO CASANOVA I", cod: "191", tipo: "INBOUND", compe: "INBOUND", prov: "BUENOS AIRES", loc: "ISIDRO CASANOVA", dep: "LA MATANZA", zona: "OESTE 2" },
+  { nombre: "ISIDRO CASANOVA I", cod: "191", tipo: "CENTRAL D", compe: "CENTRAL D", prov: "BUENOS AIRES", loc: "ISIDRO CASANOVA", dep: "LA MATANZA", zona: "OESTE 2" },
   { nombre: "ITUZAINGO I", cod: "192", tipo: "MASIVA", compe: "AMBA", prov: "BUENOS AIRES", loc: "ITUZAINGO", dep: "ITUZAINGÓ", zona: "OESTE 2" },
   { nombre: "JUAN M GUTIERREZ I", cod: "193", tipo: "MASIVA", compe: "AMBA", prov: "BUENOS AIRES", loc: "GUILLERMO HUDSON", dep: "BERAZATEGUI", zona: "SUR 2" },
   { nombre: "JOSE C PAZ I", cod: "196", tipo: "MASIVA", compe: "AMBA", prov: "BUENOS AIRES", loc: "JOSE C PAZ", dep: "JOSÉ C. PAZ", zona: "AMBA NORTE" },
-  { nombre: "JUNIN I", cod: "200", tipo: "INBOUND", compe: "INBOUND", prov: "BUENOS AIRES", loc: "JUNIN", dep: "JUNIN", zona: "RESTO PBA" },
+  { nombre: "JUNIN I", cod: "200", tipo: "CENTRAL D", compe: "CENTRAL D", prov: "BUENOS AIRES", loc: "JUNIN", dep: "JUNIN", zona: "RESTO PBA" },
   
   // LA PLATA Y MAR DEL PLATA
   { nombre: "BERISSO I", cod: "209", tipo: "CRITICA", compe: "ALTA COMPE", prov: "BUENOS AIRES", loc: "BERISSO", dep: "LA PLATA", zona: "LA PLATA" },
   { nombre: "CITY BELL I", cod: "210", tipo: "MASIVA", compe: "AMBA", prov: "BUENOS AIRES", loc: "CITY BELL", dep: "LA PLATA", zona: "LA PLATA" },
   { nombre: "ENSENADA I", cod: "211", tipo: "MASIVA", compe: "AMBA", prov: "BUENOS AIRES", loc: "ENSENADA", dep: "ENSENADA", zona: "LA PLATA" },
-  { nombre: "SAN MARTIN I (LP)", cod: "213", tipo: "INBOUND", compe: "INBOUND", prov: "BUENOS AIRES", loc: "LA PLATA", dep: "LA PLATA", zona: "LA PLATA" },
-  { nombre: "GONNET I", cod: "215", tipo: "INBOUND", compe: "INBOUND", prov: "BUENOS AIRES", loc: "LA PLATA", dep: "LA PLATA", zona: "LA PLATA" },
-  { nombre: "ROCHA II", cod: "217", tipo: "INBOUND", compe: "INBOUND", prov: "BUENOS AIRES", loc: "LA PLATA", dep: "LA PLATA", zona: "LA PLATA" },
-  { nombre: "TACUARI I", cod: "218", tipo: "INBOUND", compe: "INBOUND", prov: "BUENOS AIRES", loc: "LA PLATA", dep: "LA PLATA", zona: "LA PLATA" },
-  { nombre: "VILLA ELISA I", cod: "219", tipo: "INBOUND", compe: "INBOUND", prov: "BUENOS AIRES", loc: "VILLA ELISA", dep: "LA PLATA", zona: "LA PLATA" },
+  { nombre: "SAN MARTIN I (LP)", cod: "213", tipo: "CENTRAL D", compe: "CENTRAL D", prov: "BUENOS AIRES", loc: "LA PLATA", dep: "LA PLATA", zona: "LA PLATA" },
+  { nombre: "GONNET I", cod: "215", tipo: "CENTRAL D", compe: "CENTRAL D", prov: "BUENOS AIRES", loc: "LA PLATA", dep: "LA PLATA", zona: "LA PLATA" },
+  { nombre: "ROCHA II", cod: "217", tipo: "CENTRAL D", compe: "CENTRAL D", prov: "BUENOS AIRES", loc: "LA PLATA", dep: "LA PLATA", zona: "LA PLATA" },
+  { nombre: "TACUARI I", cod: "218", tipo: "CENTRAL D", compe: "CENTRAL D", prov: "BUENOS AIRES", loc: "LA PLATA", dep: "LA PLATA", zona: "LA PLATA" },
+  { nombre: "VILLA ELISA I", cod: "219", tipo: "CENTRAL D", compe: "CENTRAL D", prov: "BUENOS AIRES", loc: "VILLA ELISA", dep: "LA PLATA", zona: "LA PLATA" },
   { nombre: "TABLADA I", cod: "220", tipo: "MASIVA", compe: "AMBA", prov: "BUENOS AIRES", loc: "VILLA EDUARDO MADERO", dep: "LA MATANZA", zona: "OESTE 2" },
   { nombre: "LANUS I", cod: "224", tipo: "MASIVA", compe: "AMBA", prov: "BUENOS AIRES", loc: "LANUS ESTE", dep: "LANÚS", zona: "Sur 1" },
   { nombre: "LAPRIDA", cod: "225", tipo: "MASIVA", compe: "RESTO", prov: "BUENOS AIRES", loc: "LAPRIDA", dep: "LAPRIDA", zona: "RESTO PBA" },
@@ -450,7 +458,7 @@ const BASE_CENTRALES = [
   { nombre: "LUJAN I", cod: "250", tipo: "MASIVA", compe: "AMBA", prov: "BUENOS AIRES", loc: "LUJAN", dep: "LUJAN", zona: "RESTO PBA" },
   { nombre: "MARCOS PAZ", cod: "259", tipo: "MASIVA", compe: "AMBA", prov: "BUENOS AIRES", loc: "MARCOS PAZ", dep: "MARCOS PAZ", zona: "OESTE 2" },
   
-  // MAR DEL PLATA CRITICAS
+  // MAR DEL PLATA CRITICAS (VERDE)
   { nombre: "EL MARTILLO II", cod: "260", tipo: "CRITICA", compe: "ALTA COMPE", prov: "BUENOS AIRES", loc: "MAR DEL PLATA", dep: "GENERAL PUEYRREDON", zona: "MAR DEL PLATA" },
   { nombre: "LA JUANITA I", cod: "261", tipo: "CRITICA", compe: "ALTA COMPE", prov: "BUENOS AIRES", loc: "MAR DEL PLATA", dep: "GENERAL PUEYRREDON", zona: "MAR DEL PLATA" },
   { nombre: "M D PLATA CENTRO I", cod: "262", tipo: "CRITICA", compe: "ALTA COMPE", prov: "BUENOS AIRES", loc: "MAR DEL PLATA", dep: "GENERAL PUEYRREDON", zona: "MAR DEL PLATA" },
@@ -470,13 +478,13 @@ const BASE_CENTRALES = [
   { nombre: "MONTE GRANDE I", cod: "290", tipo: "MASIVA", compe: "AMBA", prov: "BUENOS AIRES", loc: "MONTE GRANDE", dep: "ESTEBAN ECHEVERRÍA", zona: "Sur 1" },
   { nombre: "MORENO I", cod: "292", tipo: "MASIVA", compe: "AMBA", prov: "BUENOS AIRES", loc: "MORENO", dep: "MORENO", zona: "Oeste 1" },
   { nombre: "MORON I", cod: "293", tipo: "MASIVA", compe: "AMBA", prov: "BUENOS AIRES", loc: "MORON", dep: "MORÓN", zona: "OESTE 2" },
-  { nombre: "OLAVARRIA I", cod: "300", tipo: "INBOUND", compe: "INBOUND", prov: "BUENOS AIRES", loc: "OLAVARRIA", dep: "OLAVARRÍA", zona: "RESTO PBA" },
+  { nombre: "OLAVARRIA I", cod: "300", tipo: "CENTRAL D", compe: "CENTRAL D", prov: "BUENOS AIRES", loc: "OLAVARRIA", dep: "OLAVARRÍA", zona: "RESTO PBA" },
   { nombre: "PATAGONES", cod: "310", tipo: "MASIVA", compe: "RESTO", prov: "BUENOS AIRES", loc: "CARMEN DE PATAGONES", dep: "CARMEN DE PATAGONES", zona: "RESTO PBA" },
-  { nombre: "PERGAMINO I", cod: "315", tipo: "INBOUND", compe: "INBOUND", prov: "BUENOS AIRES", loc: "PERGAMINO", dep: "PERGAMINO", zona: "RESTO PBA" },
+  { nombre: "PERGAMINO I", cod: "315", tipo: "CENTRAL D", compe: "CENTRAL D", prov: "BUENOS AIRES", loc: "PERGAMINO", dep: "PERGAMINO", zona: "RESTO PBA" },
   { nombre: "PILAR I", cod: "322", tipo: "MASIVA", compe: "AMBA", prov: "BUENOS AIRES", loc: "PILAR", dep: "PILAR", zona: "AMBA NORTE" },
   { nombre: "PIÑEYRO I", cod: "325", tipo: "MASIVA", compe: "AMBA", prov: "BUENOS AIRES", loc: "VALENTIN ALSINA", dep: "LANÚS", zona: "Sur 2" },
   { nombre: "PONTEVEDRA", cod: "328", tipo: "MASIVA", compe: "AMBA", prov: "BUENOS AIRES", loc: "PONTEVEDRA", dep: "PONTEVEDRA", zona: "OESTE 1" },
-  { nombre: "PUNTA ALTA", cod: "335", tipo: "INBOUND", compe: "INBOUND", prov: "BUENOS AIRES", loc: "CORONEL ROSALES", dep: "CORONEL ROSALES", zona: "RESTO PATAGONIA" },
+  { nombre: "PUNTA ALTA", cod: "335", tipo: "CENTRAL D", compe: "CENTRAL D", prov: "BUENOS AIRES", loc: "CORONEL ROSALES", dep: "CORONEL ROSALES", zona: "RESTO PATAGONIA" },
   { nombre: "QUILMES I", cod: "338", tipo: "MASIVA", compe: "AMBA", prov: "BUENOS AIRES", loc: "QUILMES", dep: "QUILMES", zona: "SUR 1" },
   { nombre: "RAMOS MEJIA I", cod: "340", tipo: "MASIVA", compe: "AMBA", prov: "BUENOS AIRES", loc: "RAMOS MEJIA", dep: "MORÓN", zona: "OESTE 2" },
   { nombre: "RANELAGH I", cod: "343", tipo: "MASIVA", compe: "AMBA", prov: "BUENOS AIRES", loc: "RANELAGH", dep: "BERAZATEGUI", zona: "SUR 2" },
@@ -485,14 +493,14 @@ const BASE_CENTRALES = [
   { nombre: "SAN MIGUEL I", cod: "383", tipo: "MASIVA", compe: "AMBA", prov: "BUENOS AIRES", loc: "SAN MIGUEL", dep: "SAN MIGUEL", zona: "AMBA NORTE" },
   { nombre: "SAN VICENTE", cod: "386", tipo: "MASIVA", compe: "AMBA", prov: "BUENOS AIRES", loc: "SAN VICENTE", dep: "SAN VICENTE", zona: "SUR 1" },
   { nombre: "SARANDI I", cod: "392", tipo: "MASIVA", compe: "AMBA", prov: "BUENOS AIRES", loc: "SARANDI", dep: "AVELLANEDA", zona: "Sur 2" },
-  { nombre: "TANDIL I", cod: "407", tipo: "INBOUND", compe: "INBOUND", prov: "BUENOS AIRES", loc: "TANDIL", dep: "TANDIL", zona: "RESTO PBA" },
-  { nombre: "TRES ARROYOS I", cod: "420", tipo: "INBOUND", compe: "INBOUND", prov: "BUENOS AIRES", loc: "TRES ARROYOS", dep: "TRES ARROYOS", zona: "TRES ARROYOS" },
+  { nombre: "TANDIL I", cod: "407", tipo: "CENTRAL D", compe: "CENTRAL D", prov: "BUENOS AIRES", loc: "TANDIL", dep: "TANDIL", zona: "RESTO PBA" },
+  { nombre: "TRES ARROYOS I", cod: "420", tipo: "CENTRAL D", compe: "CENTRAL D", prov: "BUENOS AIRES", loc: "TRES ARROYOS", dep: "TRES ARROYOS", zona: "TRES ARROYOS" },
   { nombre: "TRISTAN SUAREZ I", cod: "423", tipo: "MASIVA", compe: "AMBA", prov: "BUENOS AIRES", loc: "TRISTAN SUAREZ", dep: "EZEIZA", zona: "Sur 1" },
   { nombre: "TRUJUI I", cod: "425", tipo: "MASIVA", compe: "AMBA", prov: "BUENOS AIRES", loc: "SAN MIGUEL", dep: "SAN MIGUEL", zona: "OESTE 1" },
   { nombre: "25 DE MAYO", cod: "436", tipo: "MASIVA", compe: "AMBA", prov: "BUENOS AIRES", loc: "VEINTICINCO DE MAYO", dep: "BUENOS AIRES", zona: "RESTO PBA" },
   { nombre: "BARRIO LINDO", cod: "652", tipo: "CRITICA", compe: "ALTA COMPE", prov: "BUENOS AIRES", loc: "MALVINAS ARGENTINAS", dep: "MALVINAS ARGENTINAS", zona: "SUR 1" },
 
-  // MENDOZA (MAYORÍA CENTRALES CRÍTICAS / ALTA COMPE)
+  // MENDOZA (CRÍTICAS EN VERDE)
   { nombre: "CHACRAS DE CORIA", cod: "84", tipo: "CRITICA", compe: "ALTA COMPE", prov: "MENDOZA", loc: "LUJAN DE CUYO", dep: "LUJAN DE CUYO", zona: "MENDOZA" },
   { nombre: "FRAY LUIS BELTRAN", cod: "138", tipo: "CRITICA", compe: "ALTA COMPE", prov: "MENDOZA", loc: "FRAY LUIS BELTRAN", dep: "FRAY LUIS BELTRAN", zona: "MENDOZA" },
   { nombre: "GENERAL ALVEAR - MZA", cod: "147", tipo: "CRITICA", compe: "ALTA COMPE", prov: "MENDOZA", loc: "GENERAL ALVEAR", dep: "GENERAL ALVEAR", zona: "MENDOZA" },
@@ -526,7 +534,7 @@ const BASE_CENTRALES = [
   { nombre: "PRIMA TERRA", cod: "7502", tipo: "CRITICA", compe: "ALTA COMPE", prov: "MENDOZA", loc: "MAIPU MZ", dep: "MAIPÚ", zona: "MENDOZA" },
   { nombre: "BARRIO VISTA PUEBLO", cod: "7503", tipo: "CRITICA", compe: "ALTA COMPE", prov: "MENDOZA", loc: "CHACRAS DE CORIA", dep: "LUJAN DE CUYO", zona: "MENDOZA" },
 
-  // SAN JUAN (CRÍTICAS / ALTA COMPE)
+  // SAN JUAN (CRÍTICAS EN VERDE)
   { nombre: "ALBARDON", cod: "5", tipo: "CRITICA", compe: "ALTA COMPE", prov: "SAN JUAN", loc: "EL RINCON", dep: "VILLA GRAL SAN MARTIN", zona: "SAN JUAN" },
   { nombre: "CAUCETE", cod: "78", tipo: "CRITICA", compe: "ALTA COMPE", prov: "SAN JUAN", loc: "CAUCETE", dep: "CAUCETE", zona: "SAN JUAN" },
   { nombre: "POCITO", cod: "327", tipo: "CRITICA", compe: "ALTA COMPE", prov: "SAN JUAN", loc: "VILLA ABERASTAIN", dep: "POCITO", zona: "SAN JUAN" },
@@ -545,12 +553,12 @@ const BASE_CENTRALES = [
 
   // NEUQUEN
   { nombre: "AÑELO", cod: "24", tipo: "CRITICA", compe: "ALTA COMPE", prov: "NEUQUEN", loc: "AÑELO", dep: "AÑELO", zona: "NEUQUEN" },
-  { nombre: "NEUQUEN I", cod: "298", tipo: "CRITICA", compe: "INBOUND / CRITICA", prov: "NEUQUEN", loc: "NEUQUEN", dep: "CONFLUENCIA", zona: "NEUQUEN" },
-  { nombre: "ZAPALA I", cod: "462", tipo: "CRITICA", compe: "INBOUND / CRITICA", prov: "NEUQUEN", loc: "ZAPALA", dep: "ZAPALA", zona: "NEUQUEN" },
-  { nombre: "COLONIA VALENTINA I", cod: "476", tipo: "CRITICA", compe: "INBOUND / CRITICA", prov: "NEUQUEN", loc: "NEUQUEN", dep: "CONFLUENCIA", zona: "NEUQUEN" },
-  { nombre: "LAFINUR", cod: "721", tipo: "CRITICA", compe: "INBOUND / CRITICA", prov: "NEUQUEN", loc: "NEUQUEN", dep: "CONFLUENCIA", zona: "NEUQUEN" },
-  { nombre: "ALTA BARDA", cod: "722", tipo: "CRITICA", compe: "INBOUND / CRITICA", prov: "NEUQUEN", loc: "NEUQUEN", dep: "CONFLUENCIA", zona: "NEUQUEN" },
-  { nombre: "ROLDAN", cod: "723", tipo: "CRITICA", compe: "INBOUND / CRITICA", prov: "NEUQUEN", loc: "NEUQUEN", dep: "CONFLUENCIA", zona: "NEUQUEN" },
+  { nombre: "NEUQUEN I", cod: "298", tipo: "CRITICA", compe: "CENTRAL D / CRITICA", prov: "NEUQUEN", loc: "NEUQUEN", dep: "CONFLUENCIA", zona: "NEUQUEN" },
+  { nombre: "ZAPALA I", cod: "462", tipo: "CRITICA", compe: "CENTRAL D / CRITICA", prov: "NEUQUEN", loc: "ZAPALA", dep: "ZAPALA", zona: "NEUQUEN" },
+  { nombre: "COLONIA VALENTINA I", cod: "476", tipo: "CRITICA", compe: "CENTRAL D / CRITICA", prov: "NEUQUEN", loc: "NEUQUEN", dep: "CONFLUENCIA", zona: "NEUQUEN" },
+  { nombre: "LAFINUR", cod: "721", tipo: "CRITICA", compe: "CENTRAL D / CRITICA", prov: "NEUQUEN", loc: "NEUQUEN", dep: "CONFLUENCIA", zona: "NEUQUEN" },
+  { nombre: "ALTA BARDA", cod: "722", tipo: "CRITICA", compe: "CENTRAL D / CRITICA", prov: "NEUQUEN", loc: "NEUQUEN", dep: "CONFLUENCIA", zona: "NEUQUEN" },
+  { nombre: "ROLDAN", cod: "723", tipo: "CRITICA", compe: "CENTRAL D / CRITICA", prov: "NEUQUEN", loc: "NEUQUEN", dep: "CONFLUENCIA", zona: "NEUQUEN" },
 
   // LA PAMPA / RIO NEGRO / PATAGONIA
   { nombre: "SANTA ROSA I", cod: "388", tipo: "CRITICA", compe: "ALTA COMPE", prov: "LA PAMPA", loc: "SANTA ROSA", dep: "SANTA ROSA", zona: "RESTO PATAGONIA" },
@@ -560,10 +568,10 @@ const BASE_CENTRALES = [
   { nombre: "DINA HUAPI", cod: "37", tipo: "MASIVA", compe: "RESTO", prov: "RIO NEGRO", loc: "PILCANIYEU", dep: "PILCANIYEU", zona: "BARILOCHE" },
   { nombre: "HUEMUL I", cod: "38", tipo: "MASIVA", compe: "RESTO", prov: "RIO NEGRO", loc: "BARILOCHE", dep: "BARILOCHE", zona: "BARILOCHE" },
   { nombre: "CHOELE CHOEL", cod: "89", tipo: "MASIVA", compe: "RESTO", prov: "RIO NEGRO", loc: "CHOELE CHOEL", dep: "AVELLANEDA", zona: "TRELEW" },
-  { nombre: "CINCO SALTOS", cod: "91", tipo: "INBOUND", compe: "INBOUND", prov: "RIO NEGRO", loc: "CINCO SALTOS", dep: "GENERAL ROCA", zona: "NEUQUEN" },
-  { nombre: "CIPOLLETTI I", cod: "92", tipo: "INBOUND", compe: "INBOUND", prov: "RIO NEGRO", loc: "CIPOLLETTI", dep: "GENERAL ROCA", zona: "NEUQUEN" },
+  { nombre: "CINCO SALTOS", cod: "91", tipo: "CENTRAL D", compe: "CENTRAL D", prov: "RIO NEGRO", loc: "CINCO SALTOS", dep: "GENERAL ROCA", zona: "NEUQUEN" },
+  { nombre: "CIPOLLETTI I", cod: "92", tipo: "CENTRAL D", compe: "CENTRAL D", prov: "RIO NEGRO", loc: "CIPOLLETTI", dep: "GENERAL ROCA", zona: "NEUQUEN" },
   { nombre: "VIEDMA I", cod: "441", tipo: "MASIVA", compe: "RESTO", prov: "RIO NEGRO", loc: "VIEDMA", dep: "VIEDMA", zona: "SION" },
-  { nombre: "BARRIO VILLARINO", cod: "720", tipo: "INBOUND", compe: "INBOUND", prov: "RIO NEGRO", loc: "CIPOLLETTI", dep: "GENERAL ROCA", zona: "NEUQUEN" },
+  { nombre: "BARRIO VILLARINO", cod: "720", tipo: "CENTRAL D", compe: "CENTRAL D", prov: "RIO NEGRO", loc: "CIPOLLETTI", dep: "GENERAL ROCA", zona: "NEUQUEN" },
 
   // CABA
   { nombre: "CABALLITO I", cod: "57", tipo: "MASIVA", compe: "AMBA", prov: "CABA", loc: "CABA", dep: "CABA", zona: "CABA" },
@@ -579,7 +587,7 @@ function buscarCentral() {
     const stats = document.getElementById('central-stats');
 
     if (!q) {
-        cont.innerHTML = '<p style="color:var(--text-muted); text-align:center; margin-top:20px;">Escribe el nombre de una central arriba para ver si es Alta Compe (Crítica) o Normal (Masiva).</p>';
+        cont.innerHTML = '<p style="color:var(--text-muted); text-align:center; margin-top:20px;">Escribe el nombre de una central arriba para ver si es Crítica (Verde), Común (Amarillo) o Central D (Azul).</p>';
         stats.innerText = '';
         return;
     }
@@ -605,32 +613,44 @@ function buscarCentral() {
     let html = '';
     filtrados.forEach(c => {
         const esCritica = c.tipo === 'CRITICA' || c.compe.includes('CRITICA') || c.compe.includes('ALTA COMPE');
-        const esInbound = c.tipo === 'INBOUND' || c.compe.includes('INBOUND');
+        const esCentralD = c.tipo === 'CENTRAL D' || c.compe.includes('CENTRAL D') || c.compe.includes('INBOUND');
 
         let cartel = '';
+        let badgeClass = '';
+        let badgeTexto = '';
+
         if (esCritica) {
-            cartel = `<div class="movi-status-box movi-rechazada" style="margin-bottom:8px; font-size:15px;">
-                🚨 ALTA COMPE / CENTRAL CRÍTICA (Aplicar Oferta Crítica)
+            // Crítica = Verde
+            cartel = `<div class="movi-status-box banner-critica" style="margin-bottom:8px; font-size:15px;">
+                🟢 ALTA COMPE / CENTRAL CRÍTICA (Aplicar Oferta Crítica)
             </div>`;
-        } else if (esInbound) {
-            cartel = `<div class="movi-status-box movi-alerta" style="margin-bottom:8px; font-size:15px;">
-                🔵 INBOUND / ESPECIAL (${c.compe})
+            badgeClass = 'tag-critica';
+            badgeTexto = 'CRÍTICA';
+        } else if (esCentralD) {
+            // Inbound = Central D (Azul)
+            cartel = `<div class="movi-status-box banner-central-d" style="margin-bottom:8px; font-size:15px;">
+                🔵 CENTRAL D
             </div>`;
+            badgeClass = 'tag-central-d';
+            badgeTexto = 'CENTRAL D';
         } else {
-            cartel = `<div class="movi-status-box movi-aprobada" style="margin-bottom:8px; font-size:15px;">
-                ✅ NORMAL / OFERTA MASIVA (Grilla Masiva Estándar)
+            // Común / Masiva = Amarillo
+            cartel = `<div class="movi-status-box banner-comun" style="margin-bottom:8px; font-size:15px;">
+                🟡 COMÚN / OFERTA MASIVA (Grilla Masiva Estándar)
             </div>`;
+            badgeClass = 'tag-comun';
+            badgeTexto = 'COMÚN';
         }
 
         html += `<div class="central-card">
             ${cartel}
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
                 <span style="font-size:16px; font-weight:bold; color:var(--primary);">${c.nombre} (Cód: ${c.cod})</span>
-                <span class="${esCritica ? 'tag-critica' : (esInbound ? 'tag-inbound' : 'tag-masiva')}">${c.tipo}</span>
+                <span class="${badgeClass}">${badgeTexto}</span>
             </div>
             <div style="font-size:13px; margin:3px 0;"><strong>Localidad:</strong> ${c.loc} | <strong>Departamento:</strong> ${c.dep}</div>
             <div style="font-size:13px; margin:3px 0;"><strong>Provincia:</strong> ${c.prov} | <strong>Zona Comercial:</strong> ${c.zona}</div>
-            <div style="font-size:13px; color:var(--text-muted);"><strong>Zona Competencia:</strong> ${c.compe}</div>
+            <div style="font-size:13px; color:var(--text-muted);"><strong>Zona Competencia:</strong> ${esCentralD ? 'CENTRAL D' : c.compe}</div>
         </div>`;
     });
 
