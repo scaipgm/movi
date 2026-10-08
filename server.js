@@ -56,7 +56,6 @@ function parsearPeriodos(periodos) {
     return registros;
 }
 
-// Consulta interna al BCRA con headers de navegador
 async function consultarBCRAInterno(cuit) {
     let denominacion = null;
     let registros = [];
@@ -94,7 +93,6 @@ async function consultarBCRAInterno(cuit) {
     return { denominacion, registros };
 }
 
-// Endpoint Persona
 app.post('/api/consultar', async (req, res) => {
     const { dni, genero, password } = req.body;
     if (password !== CLAVE_SECRETA) {
@@ -126,7 +124,6 @@ app.post('/api/consultar', async (req, res) => {
     res.json({ dni, reportes });
 });
 
-// Endpoint Coordenadas exactas para cobertura
 app.get('/api/coords', async (req, res) => {
     const { q } = req.query;
     if (!q) return res.status(400).json({ error: 'Dirección requerida' });
@@ -150,7 +147,6 @@ app.get('/api/coords', async (req, res) => {
     }
 });
 
-// Endpoint Tarjetas BIN
 app.get('/api/bin/:bin', async (req, res) => {
     try {
         const response = await axios.get(`https://data.handyapi.com/bin/${req.params.bin}`, { timeout: 4000 });
