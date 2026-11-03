@@ -6,26 +6,6 @@
     <title>Panel de Gestión Integral - Movi</title>
     <style>
         :root {
-            --bg-body: #edf2f7;
-            --bg-card: #ffffff;
-            --text-main: #1a202c;
-            --text-label: #4a5568;
-            --text-muted: #718096;
-            --border-color: #cbd5e0;
-            --tab-inactive: #cbd5e0;
-            --tab-inactive-text: #2d3748;
-            --box-bg: #f8fafc;
-            --item-bg: #ffffff;
-            --primary: #2b6cb0;
-            --primary-hover: #2c5282;
-            --shadow: rgba(0,0,0,0.08);
-
-            --color-sit-1: #22c55e;
-            --color-sit-mid: #eab308;
-            --color-sit-5: #ef4444;
-        }
-
-        body.dark-mode {
             --bg-body: #0f172a;
             --bg-card: #1e293b;
             --text-main: #f8fafc;
@@ -39,6 +19,26 @@
             --primary: #3b82f6;
             --primary-hover: #1d4ed8;
             --shadow: rgba(0,0,0,0.4);
+
+            --color-sit-1: #22c55e;
+            --color-sit-mid: #eab308;
+            --color-sit-5: #ef4444;
+        }
+
+        body.light-mode {
+            --bg-body: #edf2f7;
+            --bg-card: #ffffff;
+            --text-main: #1a202c;
+            --text-label: #4a5568;
+            --text-muted: #718096;
+            --border-color: #cbd5e0;
+            --tab-inactive: #cbd5e0;
+            --tab-inactive-text: #2d3748;
+            --box-bg: #f8fafc;
+            --item-bg: #ffffff;
+            --primary: #2b6cb0;
+            --primary-hover: #2c5282;
+            --shadow: rgba(0,0,0,0.08);
         }
 
         body { 
@@ -50,7 +50,81 @@
             transition: background 0.2s ease, color 0.2s ease;
         }
 
-        .container { max-width: 720px; margin: 10px auto; }
+        /* Layout Grid Principal */
+        .layout-wrapper {
+            display: grid;
+            grid-template-columns: 240px minmax(0, 720px) 260px;
+            gap: 15px;
+            max-width: 1300px;
+            margin: 0 auto;
+            align-items: start;
+        }
+
+        @media (max-width: 1024px) {
+            .layout-wrapper {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .side-panel {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 4px 15px var(--shadow);
+            font-size: 13px;
+        }
+
+        .side-panel h3 {
+            margin-top: 0;
+            margin-bottom: 12px;
+            font-size: 15px;
+            color: var(--primary);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 6px;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .price-group {
+            margin-bottom: 14px;
+        }
+
+        .price-group-title {
+            font-weight: 800;
+            font-size: 12px;
+            color: var(--text-label);
+            text-transform: uppercase;
+            margin-bottom: 6px;
+            display: block;
+            background: var(--box-bg);
+            padding: 4px 8px;
+            border-radius: 4px;
+            border-left: 3px solid var(--primary);
+        }
+
+        .price-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 4px 0;
+            border-bottom: 1px dashed var(--border-color);
+        }
+
+        .price-row:last-child {
+            border-bottom: none;
+        }
+
+        .price-val {
+            font-family: monospace;
+            font-weight: bold;
+        }
+
+        .price-val .comun { color: #ef4444; }
+        .price-val .tota { color: #22c55e; }
+
+        .container { max-width: 100%; margin: 0 auto; }
         .top-bar { display: flex; justify-content: flex-end; margin-bottom: 8px; }
         .btn-theme {
             background: var(--bg-card);
@@ -66,7 +140,8 @@
             margin: 0;
         }
 
-        .tabs { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; margin-bottom: 8px; }
+        /* Pestañas */
+        .tabs { display: grid; grid-template-columns: repeat(5, 1fr); gap: 3px; margin-bottom: 8px; }
         .tab-btn { 
             padding: 9px 1px; 
             border: none; 
@@ -135,7 +210,6 @@
         .movi-aprobada { background: #dcfce7; border: 2px solid #22c55e; color: #166534; }
         .movi-alerta { background: #fef9c3; border: 2px solid #eab308; color: #854d0e; }
 
-        /* Estilos Centrales */
         .central-card {
             background: var(--item-bg);
             border: 1px solid var(--border-color);
@@ -194,182 +268,199 @@
             gap: 8px;
         }
         .btn-whatsapp:hover { background: #1ebd56; }
+
+        .legend-box {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 8px;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <div class="top-bar">
-        <button class="btn-theme" onclick="toggleTheme()" id="theme-toggle">🌙 Modo Oscuro</button>
-    </div>
+<div class="layout-wrapper">
 
-    <div class="tabs">
-        <button class="tab-btn active" id="btn-t1" onclick="verTab('tab-cuit')">👤 DNI</button>
-        <button class="tab-btn" id="btn-t7" onclick="verTab('tab-centrales')">🏢 Centrales</button>
-        <button class="tab-btn" id="btn-t2" onclick="verTab('tab-geo')">📍 Mapa</button>
-        <button class="tab-btn" id="btn-t3" onclick="verTab('tab-nollame')">🚫 NoLlame</button>
-        <button class="tab-btn" id="btn-t6" onclick="verTab('tab-nosis')">🔍 Nosis</button>
-        <button class="tab-btn" id="btn-t4" onclick="verTab('tab-tarjeta')">💳 Tarjetas</button>
-        <button class="tab-btn" id="btn-t5" onclick="verTab('tab-planilla')">📋 Planilla</button>
-    </div>
+    <!-- PANEL IZQUIERDO: PRECIOS RESIDENCIAL -->
+    <div class="side-panel">
+        <h3>💵 Precios Servicios</h3>
 
-    <!-- 1. DNI / CUIT / BCRA -->
-    <div id="tab-cuit" class="card">
-        <h2>Consulta DNI / CUIT / Situación BCRA</h2>
-        <label>Contraseña de acceso:</label>
-        <input type="password" id="password" value="tarde" placeholder="Ingresa contraseña">
-
-        <label>Número de DNI:</label>
-        <input type="number" id="dni" placeholder="Ej: 45140633">
-
-        <label>Género a consultar:</label>
-        <select id="genero">
-            <option value="AMBOS">Consultar ambos (M y F)</option>
-            <option value="M">Masculino (Prefijo 20)</option>
-            <option value="F">Femenino (Prefijo 27)</option>
-        </select>
-
-        <button class="btn-submit" onclick="consultarPersona()">Consultar Datos</button>
-        <div id="out-persona"></div>
-    </div>
-
-    <!-- 2. PESTAÑA: BUSCADOR DE CENTRALES (ACTUALIZADO CON CLUSTER D) -->
-    <div id="tab-centrales" class="card" style="display:none;">
-        <h2>Buscador de Centrales</h2>
-        <label>Nombre de la Central, Ciudad o Localidad:</label>
-        <input type="text" id="central-search" placeholder="Ej: Bolivar, Miramar, Guernica, Juan Jufre, Palmira, Chacabuco..." oninput="buscarCentral()" autofocus>
-
-        <div id="central-stats" style="font-size:12px; color:var(--text-muted); margin-top:8px;"></div>
-        <div id="central-results"></div>
-    </div>
-
-    <!-- 3. MAPA COBERTURA -->
-    <div id="tab-geo" class="card" style="display:none;">
-        <h2>Buscar Cobertura en Google Maps</h2>
-        <label>Dirección y localidad (o entrecalle):</label>
-        <div style="display:flex; gap:8px; margin-top:5px;">
-            <input type="text" id="dir-input" placeholder="Ej: Calle el volcan 2241, Las Heras o El volcan y tunuyan" style="margin-top:0;">
-            <button class="btn-sm" style="background:var(--primary); color:white; padding:0 16px;" onclick="buscarEnGoogleMaps()">Buscar</button>
+        <div class="price-group">
+            <span class="price-group-title">Alta Compe</span>
+            <div class="price-row">
+                <span>300 MB</span>
+                <span class="price-val"><span class="comun">$18.000</span> / <span class="tota">$14.999</span></span>
+            </div>
+            <div class="price-row">
+                <span>600 MB</span>
+                <span class="price-val"><span class="comun">$21.999</span> / <span class="tota">$17.999</span></span>
+            </div>
+            <div class="price-row">
+                <span>1 GB</span>
+                <span class="price-val"><span class="comun">$39.000</span> / <span class="tota">$35.000</span></span>
+            </div>
         </div>
 
-        <div id="box-coords" style="display:none; margin-top:12px; background:var(--box-bg); padding:10px; border-radius:6px; border:1px solid var(--border-color);">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div class="price-group">
+            <span class="price-group-title">Común</span>
+            <div class="price-row">
+                <span>600 MB</span>
+                <span class="price-val"><span class="comun">$26.000</span> / <span class="tota">$22.000</span></span>
+            </div>
+            <div class="price-row">
+                <span>1 GB</span>
+                <span class="price-val"><span class="comun">$40.700</span> / <span class="tota">$34.000</span></span>
+            </div>
+        </div>
+
+        <div class="price-group">
+            <span class="price-group-title">Televisión & Adicionales</span>
+            <div class="price-row">
+                <span>Deco</span>
+                <span class="price-val">$4.800</span>
+            </div>
+            <div class="price-row">
+                <span>TV Digital</span>
+                <span class="price-val">$13.800</span>
+            </div>
+            <div class="price-row">
+                <span>TV Max</span>
+                <span class="price-val">$12.000</span>
+            </div>
+        </div>
+
+        <div class="legend-box">
+            🔴 <span style="color:#ef4444; font-weight:bold;">Precio Común</span> | 🟢 <span style="color:#22c55e; font-weight:bold;">Totalizado</span>
+        </div>
+    </div>
+
+    <!-- PANEL CENTRAL PRINCIPAL -->
+    <div class="container">
+        <div class="top-bar">
+            <button class="btn-theme" onclick="toggleTheme()" id="theme-toggle">☀️ Modo Claro</button>
+        </div>
+
+        <div class="tabs">
+            <button class="tab-btn active" id="btn-t1" onclick="verTab('tab-cuit')">👤 DNI</button>
+            <button class="tab-btn" id="btn-t7" onclick="verTab('tab-centrales')">🏢 Centrales</button>
+            <button class="tab-btn" id="btn-t3" onclick="verTab('tab-nollame')">🚫 NoLlame</button>
+            <button class="tab-btn" id="btn-t4" onclick="verTab('tab-tarjeta')">💳 Tarjetas</button>
+            <button class="tab-btn" id="btn-t5" onclick="verTab('tab-planilla')">📋 Planilla</button>
+        </div>
+
+        <!-- 1. DNI / CUIT / BCRA -->
+        <div id="tab-cuit" class="card">
+            <h2>Consulta DNI / CUIT / Situación BCRA</h2>
+            <label>Contraseña de acceso:</label>
+            <input type="password" id="password" value="tarde" placeholder="Ingresa contraseña">
+
+            <label>Número de DNI:</label>
+            <input type="number" id="dni" placeholder="Ej: 45140633">
+
+            <label>Género a consultar:</label>
+            <select id="genero">
+                <option value="AMBOS">Consultar ambos (M y F)</option>
+                <option value="M">Masculino (Prefijo 20)</option>
+                <option value="F">Femenino (Prefijo 27)</option>
+            </select>
+
+            <button class="btn-submit" onclick="consultarPersona()">Consultar Datos</button>
+            <div id="out-persona"></div>
+        </div>
+
+        <!-- 2. PESTAÑA: BUSCADOR DE CENTRALES -->
+        <div id="tab-centrales" class="card" style="display:none;">
+            <h2>Buscador de Centrales</h2>
+            <label>Nombre de la Central, Ciudad o Localidad:</label>
+            <input type="text" id="central-search" placeholder="Ej: Bolivar, Miramar, Guernica, Juan Jufre, Palmira, Chacabuco..." oninput="buscarCentral()" autofocus>
+
+            <div id="central-stats" style="font-size:12px; color:var(--text-muted); margin-top:8px;"></div>
+            <div id="central-results"></div>
+        </div>
+
+        <!-- 3. NO LLAME -->
+        <div id="tab-nollame" class="card" style="display:none; padding: 12px;">
+            <div style="width: 100%; height: 500px; border-radius: 8px; overflow: hidden; border: 1px solid var(--border-color); background: white;">
+                <iframe id="frame-nollame" src="https://nollame.damatec.com.ar/" style="width: 100%; height: 100%; border: none;"></iframe>
+            </div>
+        </div>
+
+        <!-- 4. VALIDADOR DE TARJETAS -->
+        <div id="tab-tarjeta" class="card" style="display:none;">
+            <h2>Validador de Tarjetas (Filtro Call Movi)</h2>
+            <label>Número de Tarjeta: <span id="contador-digitos" class="counter-badge">0 dígitos</span></label>
+            <input type="text" id="num-tarjeta" placeholder="Pega los dígitos aquí..." maxlength="23" oninput="analizarTarjeta()">
+
+            <div class="box-result">
+                <div id="movi-alert" class="movi-status-box movi-alerta" style="display:none;"></div>
+
+                <div class="card-row"><span><strong>Cantidad de Dígitos:</strong></span><span id="card-len">0</span></div>
+                <div class="card-row"><span><strong>Red / Franquicia:</strong></span><span id="card-brand" style="font-weight:bold;">-</span></div>
+                <div class="card-row"><span><strong>Tipo:</strong></span><span id="card-type" style="font-weight:bold;">-</span></div>
+                <div class="card-row"><span><strong>Banco Emisor:</strong></span><span id="card-bank" style="font-weight:bold; color:var(--primary);">-</span></div>
+                <div class="card-row"><span><strong>Tarjeta Naranja:</strong></span><span id="card-naranja" style="font-weight:bold;">-</span></div>
+                <div class="card-row"><span><strong>País:</strong></span><span id="card-country">-</span></div>
+                <div class="card-row" style="border-top:1px solid var(--border-color); padding-top:8px;">
+                    <span><strong>Validación Luhn (Matemática):</strong></span><span id="card-luhn" style="font-weight:bold;">-</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. PLANILLA MOVISTAR -->
+        <div id="tab-planilla" class="card" style="display:none;">
+            <h2>Armador de Planilla Movistar</h2>
+            
+            <div class="form-grid">
                 <div>
-                    <span style="font-size:12px; color:var(--text-muted); font-weight:bold;">COORDENADAS:</span><br>
-                    <span id="coords-val" style="font-family:monospace; font-size:16px; font-weight:bold; color:var(--primary);">-</span>
+                    <label>Plan - Velocidad:</label>
+                    <input type="text" id="p-plan" placeholder="Ej: 300 Megas Fibra" oninput="actualizarPreviewPlanilla()">
                 </div>
-                <div style="display:flex; gap:6px;">
-                    <button class="btn-sm btn-copy" onclick="copiarCoords()">Copiar Coords</button>
-                    <button class="btn-sm" style="background:#0d9488; color:white;" onclick="pasarCoordsAPlanilla()">Usar en Planilla</button>
+                <div>
+                    <label>Puntaje:</label>
+                    <input type="text" id="p-puntaje" placeholder="Ej: 750 / Apto" oninput="actualizarPreviewPlanilla()">
                 </div>
             </div>
-        </div>
 
-        <div style="width: 100%; height: 420px; border-radius: 8px; overflow: hidden; border: 1px solid var(--border-color); margin-top: 12px; background: white;">
-            <iframe id="mapa-frame" src="https://maps.google.com/maps?q=Las%20Heras,%20Mendoza&t=&z=14&ie=UTF8&iwloc=&output=embed" style="width: 100%; height: 100%; border: none;"></iframe>
-        </div>
-        <div style="display:flex; justify-content:space-between; margin-top:10px;">
-            <button class="btn-sm btn-copy" onclick="copiarDireccion()">Copiar Dirección</button>
-            <a id="link-maps-externo" href="https://www.google.com/maps" target="_blank" style="font-size:13px; color:var(--primary); font-weight:bold; text-decoration:none; padding:8px 0;">Abrir en app de Maps ↗</a>
-        </div>
-    </div>
+            <label>Nombre - DNI - Fecha Nacimiento:</label>
+            <input type="text" id="p-cliente" placeholder="Ej: Juan Perez - 40123456 - 15/08/1997" oninput="actualizarPreviewPlanilla()">
 
-    <!-- 4. NO LLAME -->
-    <div id="tab-nollame" class="card" style="display:none; padding: 12px;">
-        <div style="width: 100%; height: 500px; border-radius: 8px; overflow: hidden; border: 1px solid var(--border-color); background: white;">
-            <iframe id="frame-nollame" src="https://nollame.damatec.com.ar/" style="width: 100%; height: 100%; border: none;"></iframe>
-        </div>
-    </div>
-
-    <!-- 5. PESTAÑA NOSIS -->
-    <div id="tab-nosis" class="card" style="display:none; padding: 25px;">
-        <h2>Acceso Rápido a Nosis</h2>
-        <p style="font-size:14px; color:var(--text-muted); text-align:center; margin-bottom:20px;">Nosis bloquea las pantallas incrustadas. Ingresa el DNI o CUIT, cópialo y abre Nosis Oficial en una pestaña para consultar al instante.</p>
-        
-        <label>DNI, CUIT o Nombre a consultar:</label>
-        <input type="text" id="nosis-input" placeholder="Ej: 45140633">
-        
-        <button class="btn-submit" style="background:#4f46e5; margin-top:15px;" onclick="abrirNosisDirecto()">
-            🔍 Copiar Datos y Abrir Nosis
-        </button>
-    </div>
-
-    <!-- 6. VALIDADOR DE TARJETAS (RESOLUCIÓN EXACTA POR BIN DE 8 DÍGITOS) -->
-    <div id="tab-tarjeta" class="card" style="display:none;">
-        <h2>Validador de Tarjetas (Filtro Call Movi)</h2>
-        <label>Número de Tarjeta: <span id="contador-digitos" class="counter-badge">0 dígitos</span></label>
-        <input type="text" id="num-tarjeta" placeholder="Pega los dígitos aquí..." maxlength="23" oninput="analizarTarjeta()">
-
-        <div class="box-result">
-            <div id="movi-alert" class="movi-status-box movi-alerta" style="display:none;"></div>
-
-            <div class="card-row"><span><strong>Cantidad de Dígitos:</strong></span><span id="card-len">0</span></div>
-            <div class="card-row"><span><strong>Red / Franquicia:</strong></span><span id="card-brand" style="font-weight:bold;">-</span></div>
-            <div class="card-row"><span><strong>Tipo:</strong></span><span id="card-type" style="font-weight:bold;">-</span></div>
-            <div class="card-row"><span><strong>Banco Emisor:</strong></span><span id="card-bank" style="font-weight:bold; color:var(--primary);">-</span></div>
-            <div class="card-row"><span><strong>Tarjeta Naranja:</strong></span><span id="card-naranja" style="font-weight:bold;">-</span></div>
-            <div class="card-row"><span><strong>País:</strong></span><span id="card-country">-</span></div>
-            <div class="card-row" style="border-top:1px solid var(--border-color); padding-top:8px;">
-                <span><strong>Validación Luhn (Matemática):</strong></span><span id="card-luhn" style="font-weight:bold;">-</span>
+            <div class="form-grid">
+                <div>
+                    <label>Totalización:</label>
+                    <input type="text" id="p-totalizacion" placeholder="Ej: Totalizado con línea 261..." oninput="actualizarPreviewPlanilla()">
+                </div>
+                <div>
+                    <label>Coordenadas:</label>
+                    <input type="text" id="p-coords" placeholder="Ej: -32.8512, -68.8315" oninput="actualizarPreviewPlanilla()">
+                </div>
             </div>
-        </div>
-    </div>
 
-    <!-- 7. PLANILLA MOVISTAR -->
-    <div id="tab-planilla" class="card" style="display:none;">
-        <h2>Armador de Planilla Movistar</h2>
-        
-        <div class="form-grid">
-            <div>
-                <label>Plan - Velocidad:</label>
-                <input type="text" id="p-plan" placeholder="Ej: 300 Megas Fibra" oninput="actualizarPreviewPlanilla()">
+            <label>Domicilio / Localidad:</label>
+            <input type="text" id="p-domicilio" placeholder="Ej: Calle El Volcán 2241, Las Heras, Mendoza" oninput="actualizarPreviewPlanilla()">
+
+            <label>Entre calles (3):</label>
+            <input type="text" id="p-entrecalles" placeholder="Ej: Tunuyán, San Martín y Olascoaga" oninput="actualizarPreviewPlanilla()">
+
+            <label>Audio / WhatsApp / Alternativo / FH:</label>
+            <input type="text" id="p-telefonos" placeholder="Ej: 2615123456 / 2615987654 / Mañana" oninput="actualizarPreviewPlanilla()">
+
+            <div class="form-grid">
+                <div>
+                    <label>Mail:</label>
+                    <input type="email" id="p-mail" placeholder="cliente@gmail.com" oninput="actualizarPreviewPlanilla()">
+                </div>
+                <div>
+                    <label>Forma de Pago:</label>
+                    <input type="text" id="p-pago" placeholder="Ej: Débito Banco Galicia" oninput="actualizarPreviewPlanilla()">
+                </div>
             </div>
-            <div>
-                <label>Puntaje:</label>
-                <input type="text" id="p-puntaje" placeholder="Ej: 750 / Apto" oninput="actualizarPreviewPlanilla()">
-            </div>
-        </div>
 
-        <label>Nombre - DNI - Fecha Nacimiento:</label>
-        <input type="text" id="p-cliente" placeholder="Ej: Juan Perez - 40123456 - 15/08/1997" oninput="actualizarPreviewPlanilla()">
+            <label>Vendedor:</label>
+            <input type="text" id="p-vendedor" placeholder="Tu nombre / matrícula" oninput="actualizarPreviewPlanilla()">
 
-        <div class="form-grid">
-            <div>
-                <label>Totalización:</label>
-                <input type="text" id="p-totalizacion" placeholder="Ej: Totalizado con línea 261..." oninput="actualizarPreviewPlanilla()">
-            </div>
-            <div>
-                <label>Coordenadas:</label>
-                <input type="text" id="p-coords" placeholder="Ej: -32.8512, -68.8315" oninput="actualizarPreviewPlanilla()">
-            </div>
-        </div>
-
-        <label>Domicilio / Localidad:</label>
-        <input type="text" id="p-domicilio" placeholder="Ej: Calle El Volcán 2241, Las Heras, Mendoza" oninput="actualizarPreviewPlanilla()">
-
-        <label>Entre calles (3):</label>
-        <input type="text" id="p-entrecalles" placeholder="Ej: Tunuyán, San Martín y Olascoaga" oninput="actualizarPreviewPlanilla()">
-
-        <label>Audio / WhatsApp / Alternativo / FH:</label>
-        <input type="text" id="p-telefonos" placeholder="Ej: 2615123456 / 2615987654 / Mañana" oninput="actualizarPreviewPlanilla()">
-
-        <div class="form-grid">
-            <div>
-                <label>Mail:</label>
-                <input type="email" id="p-mail" placeholder="cliente@gmail.com" oninput="actualizarPreviewPlanilla()">
-            </div>
-            <div>
-                <label>Forma de Pago:</label>
-                <input type="text" id="p-pago" placeholder="Ej: Débito Banco Galicia" oninput="actualizarPreviewPlanilla()">
-            </div>
-        </div>
-
-        <label>Vendedor:</label>
-        <input type="text" id="p-vendedor" placeholder="Tu nombre / matrícula" oninput="actualizarPreviewPlanilla()">
-
-        <div style="margin-top:15px;">
-            <label style="margin-top:0;">Vista previa de la planilla:</label>
-            <div id="planilla-preview" class="preview-box">//PLAN - VELOCIDAD: 
+            <div style="margin-top:15px;">
+                <label style="margin-top:0;">Vista previa de la planilla:</label>
+                <div id="planilla-preview" class="preview-box">//PLAN - VELOCIDAD: 
 //NOMBRE - DNI - FECHA NACIMIENTO: 
 //PUNTAJE: 
 //TOTALIZACIÓN: 
@@ -380,29 +471,83 @@
 //MAIL: 
 //FORMA DE PAGO: 
 //VENDEDOR: </div>
+            </div>
+
+            <button class="btn-whatsapp" onclick="copiarPlanillaWhatsApp()">
+                📋 Copiar Planilla para WhatsApp
+            </button>
+            <button class="btn-sm btn-copy" style="width:100%; margin-top:8px; padding:10px;" onclick="limpiarPlanilla()">
+                🔄 Limpiar campos
+            </button>
+        </div>
+    </div>
+
+    <!-- PANEL DERECHO: PRECIOS PYME -->
+    <div class="side-panel">
+        <h3>💼 Precios PyME</h3>
+
+        <div class="price-group">
+            <span class="price-group-title">PyME Alta Compe</span>
+            <div class="price-row">
+                <span>300 MB</span>
+                <span class="price-val" style="color:var(--primary);">$15.700</span>
+            </div>
+            <div class="price-row">
+                <span>600 MB</span>
+                <span class="price-val" style="color:var(--primary);">$18.100</span>
+            </div>
+            <div class="price-row">
+                <span>1 GB</span>
+                <span class="price-val" style="color:var(--primary);">$32.900</span>
+            </div>
         </div>
 
-        <button class="btn-whatsapp" onclick="copiarPlanillaWhatsApp()">
-            📋 Copiar Planilla para WhatsApp
-        </button>
-        <button class="btn-sm btn-copy" style="width:100%; margin-top:8px; padding:10px;" onclick="limpiarPlanilla()">
-            🔄 Limpiar campos
-        </button>
+        <div class="price-group">
+            <span class="price-group-title">PyME Común</span>
+            <div class="price-row">
+                <span>600 MB</span>
+                <span class="price-val" style="color:var(--primary);">$21.500</span>
+            </div>
+            <div class="price-row">
+                <span>1 GB</span>
+                <span class="price-val" style="color:var(--primary);">$32.900</span>
+            </div>
+        </div>
+
+        <div class="price-group">
+            <span class="price-group-title">Escalón Incremental</span>
+            <div class="price-row">
+                <span>Meses 1 - 6</span>
+                <span class="price-val" style="color:#22c55e;">Base</span>
+            </div>
+            <div class="price-row">
+                <span>Meses 7 - 12</span>
+                <span class="price-val" style="color:#eab308;">+22%</span>
+            </div>
+            <div class="price-row">
+                <span>Meses 13+</span>
+                <span class="price-val" style="color:#ef4444;">+44%</span>
+            </div>
+        </div>
+
+        <div class="price-group" style="background: var(--box-bg); padding: 8px; border-radius: 6px; border: 1px solid var(--border-color); text-align: center;">
+            <span style="font-weight:bold; color:#22c55e; font-size:12px; display:block;">🏷️ Descuento Totalizado</span>
+            <span style="font-size:11px; color:var(--text-muted);">En PyME (Masiva o Común) el descuento por totalización es de <strong>-$3.300</strong></span>
+        </div>
     </div>
+
 </div>
 
 <script>
-// BASE DE DATOS DE CENTRALES (ACTUALIZADA CON CLUSTER D)
+// BASE DE DATOS DE CENTRALES
 const BASE_CENTRALES = [
-  // 1. CENTRALES QUE PASARON A CENTRAL D SEGÚN ÚLTIMO ARCHIVO OFICIAL
+  // CENTRALES D
   { nombre: "BOLIVAR", cod: "50", tipo: "CENTRAL D", cambio: "PASÓ A CENTRAL D", compe: "RESTO PBA (CLUSTER D)", prov: "BUENOS AIRES", loc: "BOLIVAR", dep: "LA PLATA", zona: "RESTO PBA" },
   { nombre: "MIRAMAR I", cod: "284", tipo: "CENTRAL D", cambio: "PASÓ A CENTRAL D", compe: "MAR DEL PLATA (CLUSTER D)", prov: "BUENOS AIRES", loc: "MIRAMAR", dep: "GENERAL ALVARADO", zona: "MAR DEL PLATA" },
   { nombre: "GUERNICA I", cod: "172", tipo: "CENTRAL D", cambio: "PASÓ A CENTRAL D", compe: "SUR 1 (CLUSTER D)", prov: "BUENOS AIRES", loc: "GUERNICA", dep: "GUERNICA", zona: "Sur 1" },
   { nombre: "JUAN JUFRE I", cod: "465", tipo: "CENTRAL D", cambio: "PASÓ DE ALTA COMPE ➔ CENTRAL D", compe: "MENDOZA (CLUSTER D)", prov: "MENDOZA", loc: "MAIPU MZ", dep: "MAIPÚ", zona: "MENDOZA" },
   { nombre: "PALMIRA", cod: "303", tipo: "CENTRAL D", cambio: "PASÓ DE COMÚN ➔ CENTRAL D", compe: "MENDOZA (CLUSTER D)", prov: "MENDOZA", loc: "LOS BARRIALES", dep: "SAN MARTIN", zona: "MENDOZA" },
   { nombre: "CHACABUCO I", cod: "83", tipo: "CENTRAL D", cambio: "PASÓ A CENTRAL D", compe: "RESTO PBA (CLUSTER D)", prov: "BUENOS AIRES", loc: "CHACABUCO", dep: "CHACABUCO", zona: "RESTO PBA" },
-
-  // OTRAS CENTRAL D CONFIRMADAS
   { nombre: "OLMOS", cod: "238", tipo: "CENTRAL D", compe: "LA PLATA (CLUSTER D)", prov: "BUENOS AIRES", loc: "LA PLATA", dep: "LA PLATA", zona: "LA PLATA" },
   { nombre: "JUNIN I", cod: "200", tipo: "CENTRAL D", compe: "RESTO PBA (CLUSTER D)", prov: "BUENOS AIRES", loc: "JUNIN", dep: "JUNIN", zona: "RESTO PBA" },
   { nombre: "OLAVARRIA I", cod: "300", tipo: "CENTRAL D", compe: "RESTO PBA (CLUSTER D)", prov: "BUENOS AIRES", loc: "OLAVARRIA", dep: "OLAVARRÍA", zona: "RESTO PBA" },
@@ -443,7 +588,7 @@ const BASE_CENTRALES = [
   { nombre: "ALTA BARDA", cod: "722", tipo: "CENTRAL D", cambio: "PASÓ DE ALTA COMPE ➔ CENTRAL D", compe: "CENTRAL D", prov: "NEUQUEN", loc: "NEUQUEN", dep: "CONFLUENCIA", zona: "NEUQUEN" },
   { nombre: "ROLDAN", cod: "723", tipo: "CENTRAL D", cambio: "PASÓ DE ALTA COMPE ➔ CENTRAL D", compe: "CENTRAL D", prov: "NEUQUEN", loc: "NEUQUEN", dep: "CONFLUENCIA", zona: "NEUQUEN" },
 
-  // RESTO DE CENTRALES NORMALES Y CRÍTICAS
+  // RESTO DE CENTRALES
   { nombre: "ADROGUE I", cod: "2", tipo: "MASIVA", compe: "AMBA", prov: "BUENOS AIRES", loc: "ADROGUE", dep: "ALMIRANTE BROWN", zona: "Sur 1" },
   { nombre: "AEROPUERTO", cod: "3", tipo: "MASIVA", compe: "AMBA", prov: "BUENOS AIRES", loc: "EZEIZA", dep: "EZEIZA", zona: "SUR 1" },
   { nombre: "ALEJANDRO KORN", cod: "7", tipo: "MASIVA", compe: "AMBA", prov: "BUENOS AIRES", loc: "ALEJANDRO KORN", dep: "SAN VICENTE", zona: "Sur 1" },
@@ -671,9 +816,10 @@ function buscarCentral() {
     cont.innerHTML = html;
 }
 
-// Modo Oscuro
+// Modo Oscuro / Claro
 function toggleTheme() {
     const isDark = document.body.classList.toggle('dark-mode');
+    document.body.classList.toggle('light-mode', !isDark);
     const btn = document.getElementById('theme-toggle');
     if (isDark) {
         btn.innerHTML = '☀️ Modo Claro';
@@ -683,21 +829,20 @@ function toggleTheme() {
         localStorage.setItem('theme', 'light');
     }
 }
-if (localStorage.getItem('theme') === 'dark') {
-    document.body.classList.add('dark-mode');
-    document.getElementById('theme-toggle').innerHTML = '☀️ Modo Claro';
+if (localStorage.getItem('theme') === 'light') {
+    document.body.classList.remove('dark-mode');
+    document.body.classList.add('light-mode');
+    document.getElementById('theme-toggle').innerHTML = '🌙 Modo Oscuro';
 }
 
 function verTab(id) {
-    ['tab-cuit', 'tab-centrales', 'tab-geo', 'tab-nollame', 'tab-nosis', 'tab-tarjeta', 'tab-planilla'].forEach(t => document.getElementById(t).style.display = 'none');
-    ['btn-t1', 'btn-t7', 'btn-t2', 'btn-t3', 'btn-t6', 'btn-t4', 'btn-t5'].forEach(b => document.getElementById(b).classList.remove('active'));
+    ['tab-cuit', 'tab-centrales', 'tab-nollame', 'tab-tarjeta', 'tab-planilla'].forEach(t => document.getElementById(t).style.display = 'none');
+    ['btn-t1', 'btn-t7', 'btn-t3', 'btn-t4', 'btn-t5'].forEach(b => document.getElementById(b).classList.remove('active'));
     document.getElementById(id).style.display = 'block';
 
     if (id === 'tab-cuit') document.getElementById('btn-t1').classList.add('active');
     if (id === 'tab-centrales') { document.getElementById('btn-t7').classList.add('active'); document.getElementById('central-search').focus(); }
-    if (id === 'tab-geo') document.getElementById('btn-t2').classList.add('active');
     if (id === 'tab-nollame') document.getElementById('btn-t3').classList.add('active');
-    if (id === 'tab-nosis') document.getElementById('btn-t6').classList.add('active');
     if (id === 'tab-tarjeta') document.getElementById('btn-t4').classList.add('active');
     if (id === 'tab-planilla') document.getElementById('btn-t5').classList.add('active');
 }
@@ -705,21 +850,6 @@ function verTab(id) {
 function copiar(t) {
     navigator.clipboard.writeText(t);
     alert('Copiado: ' + t);
-}
-
-function irANosisConDato(val) {
-    document.getElementById('nosis-input').value = val;
-    verTab('tab-nosis');
-    abrirNosisDirecto();
-}
-
-function abrirNosisDirecto() {
-    const v = document.getElementById('nosis-input').value.trim();
-    if (!v) return alert('Escribe un DNI o CUIT primero.');
-    navigator.clipboard.writeText(v).then(() => {
-        alert('Copiado: ' + v + '\nSe abrirá Nosis. Solo pega el dato para buscar.');
-        window.open('https://informes.nosis.com/', '_blank');
-    });
 }
 
 // Situaciones BCRA
@@ -736,7 +866,7 @@ function getSituacionInfo(sit) {
     return { texto: `Situación ${sit}`, clase: 'badge-sit-1' };
 }
 
-// Respaldo BCRA Cliente
+// Respaldo BCRA
 async function clienteFetchBCRA(cuit) {
     const urlDirecta = `https://api.bcra.gob.ar/centraldedeudores/v1.0/Deudas/${cuit}`;
     const urlHist = `https://api.bcra.gob.ar/centraldedeudores/v1.0/Deudas/Historicas/${cuit}`;
@@ -840,9 +970,6 @@ async function consultarPersona() {
                     <a href="https://seti.afip.gob.ar/padron-puc-constancia-internet/ConsultaConstanciaAction.do" target="_blank" class="btn-arca" onclick="copiar('${item.cuit}')">
                         🏛️ Constancia ARCA
                     </a>
-                    <button class="btn-sm" style="background:#4f46e5; color:white; margin-top:8px;" onclick="irANosisConDato('${item.cuit}')">
-                        🔍 Buscar en Nosis
-                    </button>
                 </div>
 
                 <div style="margin-top:12px; font-weight:bold;">Situación Crediticia en BCRA:</div>`;
@@ -867,51 +994,7 @@ async function consultarPersona() {
     }
 }
 
-// 2. Google Maps
-let ultimasCoords = '';
-async function buscarEnGoogleMaps() {
-    const input = document.getElementById('dir-input').value.trim();
-    if (!input) return alert('Escribe una dirección o entrecalle.');
-
-    const query = encodeURIComponent(`${input}, Mendoza, Argentina`);
-    document.getElementById('mapa-frame').src = `https://maps.google.com/maps?q=${query}&t=&z=16&ie=UTF8&iwloc=&output=embed`;
-    document.getElementById('link-maps-externo').href = `https://www.google.com/maps/search/?api=1&query=${query}`;
-
-    try {
-        const res = await fetch(`/api/coords?q=${encodeURIComponent(input)}`);
-        const data = await res.json();
-        if (data.lat && data.lon) {
-            ultimasCoords = `${data.lat}, ${data.lon}`;
-            document.getElementById('coords-val').innerText = ultimasCoords;
-            document.getElementById('box-coords').style.display = 'block';
-        } else {
-            document.getElementById('box-coords').style.display = 'none';
-        }
-    } catch (e) {
-        document.getElementById('box-coords').style.display = 'none';
-    }
-}
-
-function copiarCoords() {
-    if (!ultimasCoords) return;
-    copiar(ultimasCoords);
-}
-
-function pasarCoordsAPlanilla() {
-    if (!ultimasCoords) return;
-    document.getElementById('p-coords').value = ultimasCoords;
-    actualizarPreviewPlanilla();
-    verTab('tab-planilla');
-    alert('Coordenadas cargadas en la planilla: ' + ultimasCoords);
-}
-
-function copiarDireccion() {
-    const d = document.getElementById('dir-input').value.trim();
-    if (!d) return alert('Escribe una dirección primero.');
-    copiar(d);
-}
-
-// 3. Validador de Tarjetas con Base Local Argentina (8 Dígitos Exactos)
+// 3. Validador de Tarjetas (8 Dígitos Exactos)
 function luhnCheck(num) {
     let sum = 0, alt = false;
     for (let i = num.length - 1; i >= 0; i--) {
@@ -935,7 +1018,7 @@ function resolverBancoNacional(clean) {
     const bin8 = clean.substring(0, 8);
     const bin6 = clean.substring(0, 6);
 
-    // 1. BANCO GALICIA
+    // BANCO GALICIA
     if (bin8.startsWith('45176901') || bin6 === '451769') {
         return { banco: 'BANCO GALICIA', tipo: 'DÉBITO (Visa)', esCredito: false };
     }
@@ -943,7 +1026,7 @@ function resolverBancoNacional(clean) {
         return { banco: 'BANCO GALICIA', tipo: 'CRÉDITO / DÉBITO', esCredito: null };
     }
 
-    // 2. BANCO SANTANDER
+    // BANCO SANTANDER
     if (bin8.startsWith('45176602') || bin6 === '451766') {
         return { banco: 'BANCO SANTANDER', tipo: 'DÉBITO (Visa)', esCredito: false };
     }
@@ -951,7 +1034,7 @@ function resolverBancoNacional(clean) {
         return { banco: 'BANCO SANTANDER', tipo: 'CRÉDITO / DÉBITO', esCredito: null };
     }
 
-    // 3. BANCO SUPERVIELLE
+    // BANCO SUPERVIELLE
     if (bin8.startsWith('45177229') || bin6 === '451772') {
         return { banco: 'BANCO SUPERVIELLE S.A.', tipo: 'DÉBITO (Visa)', esCredito: false };
     }
@@ -962,13 +1045,13 @@ function resolverBancoNacional(clean) {
         return { banco: 'BANCO SUPERVIELLE S.A.', tipo: 'CRÉDITO', esCredito: true };
     }
 
-    // 4. BANCO PROVINCIA DE BUENOS AIRES (BAPRO)
+    // BANCO PROVINCIA (BAPRO)
     if (bin8.startsWith('47371111') || bin8.startsWith('41908000') || bin8.startsWith('43981889') || 
         /^(473711|419080|439818|451758|451759)/.test(bin6)) {
         return { banco: 'BANCO DE LA PROVINCIA DE BUENOS AIRES', tipo: 'DÉBITO (Visa)', esCredito: false };
     }
 
-    // 5. BANCO DE LA NACIÓN ARGENTINA
+    // BANCO NACIÓN
     if (bin8.startsWith('25005862') || bin8.startsWith('25005819') || bin6 === '250058') {
         return { banco: 'BANCO DE LA NACIÓN ARGENTINA', tipo: 'DÉBITO (Mastercard)', esCredito: false };
     }
@@ -981,15 +1064,8 @@ function resolverBancoNacional(clean) {
     if (bin6 === '520053') {
         return { banco: 'BANCO DE LA NACIÓN ARGENTINA', tipo: 'DÉBITO (Mastercard)', esCredito: false };
     }
-    if (/^(540946|547632|514932)/.test(bin6)) {
-        return { banco: 'BANCO DE LA NACIÓN ARGENTINA', tipo: 'CRÉDITO (Mastercard)', esCredito: true };
-    }
 
-    // 6. BBVA BANCO FRANCÉS & MACRO
-    if (/^(451754|451755|450970)/.test(bin6)) return { banco: 'BBVA BANCO FRANCÉS', tipo: 'CRÉDITO / DÉBITO', esCredito: null };
-    if (/^(451764|451765|450992)/.test(bin6)) return { banco: 'BANCO MACRO', tipo: 'CRÉDITO / DÉBITO', esCredito: null };
-
-    // 7. TARJETA NARANJA REAL (Crédito siempre habilitada)
+    // TARJETA NARANJA X REAL
     if (/^(5895|5896|5078)/.test(bin6)) {
         return { banco: 'TARJETA NARANJA SA', esNaranja: true, tipoNaranja: 'Tarjeta Naranja Propia (Crédito)', tipo: 'CRÉDITO', esCredito: true };
     }
@@ -1007,11 +1083,9 @@ function evaluarReglasMovi(clean, esNaranja, esCredito) {
     if (esCredito === true) {
         return { status: 'APROBADA', msg: '✅ PRE-APROBADA: Tarjeta de Crédito habilitada en sistema Movi' };
     }
-
     if (esNaranja && esCredito === false) {
         return { status: 'RECHAZADA', msg: '⛔ RECHAZADA: TARJETA NARANJA DÉBITO / PREPAGA NO PERMITIDA' };
     }
-
     if (/^(60|65|63)/.test(clean)) return { status: 'RECHAZADA', msg: '⛔ RECHAZADA: Comienza con 60, 65 o 63 (No la toma T3 / Cabal Débito)' };
     if (/^5258|^5577/.test(clean)) return { status: 'RECHAZADA', msg: '⛔ RECHAZADA: Tarjeta UALÁ (Entidad digital)' };
     if (/^5547/.test(clean)) return { status: 'RECHAZADA', msg: '⛔ RECHAZADA: MERCADO PAGO (Entidad digital)' };
@@ -1020,22 +1094,10 @@ function evaluarReglasMovi(clean, esNaranja, esCredito) {
     if (/^5381/.test(clean)) return { status: 'RECHAZADA', msg: '⛔ RECHAZADA: Tarjeta Carrefour' };
     if (/^4040/.test(clean)) return { status: 'RECHAZADA', msg: '⛔ RECHAZADA: LEMON CASH (Entidad digital)' };
     if (/^4278/.test(clean)) return { status: 'RECHAZADA', msg: '⛔ RECHAZADA: PERSONAL PAY' };
-    if (/^4348/.test(clean)) return { status: 'RECHAZADA', msg: '⛔ RECHAZADA: Iniciadas con 4348 no permitidas' };
-    if (/^5255/.test(clean)) return { status: 'RECHAZADA', msg: '⛔ RECHAZADA: Banco PREX' };
-    if (/^5226/.test(clean)) return { status: 'RECHAZADA', msg: '⛔ RECHAZADA: 5226 (No la toma T3)' };
-    if (/^5427/.test(clean)) return { status: 'RECHAZADA', msg: '⛔ RECHAZADA: 5427 (No la toma T3)' };
-    if (/^4870/.test(clean)) return { status: 'RECHAZADA', msg: '⛔ RECHAZADA: 4870 (No la toma T3)' };
-    if (/^4697/.test(clean)) return { status: 'RECHAZADA', msg: '⛔ RECHAZADA: 4697 (No la toma T3)' };
-    if (/^5552/.test(clean)) return { status: 'RECHAZADA', msg: '⛔ RECHAZADA: 5552 (No la toma T3)' };
-    if (/^5412/.test(clean)) return { status: 'RECHAZADA', msg: '⛔ RECHAZADA: 5412 (No la toma T3)' };
-    if (/^4549/.test(clean)) return { status: 'RECHAZADA', msg: '⛔ RECHAZADA: BANCO SOL' };
-    if (/^5591/.test(clean)) return { status: 'RECHAZADA', msg: '⛔ RECHAZADA: CENCOPLAY' };
-    if (/^4576/.test(clean)) return { status: 'ALERTA', msg: '⚠️ ATENCIÓN: 4576 - Requiere EFECTIVO SÍ' };
 
     return null;
 }
 
-let timeoutBin;
 function analizarTarjeta() {
     const clean = document.getElementById('num-tarjeta').value.replace(/\D/g, '');
     document.getElementById('contador-digitos').innerText = `${clean.length} dígitos`;
@@ -1097,38 +1159,6 @@ function analizarTarjeta() {
 
     if (bancoLocal) {
         document.getElementById('card-country').innerText = 'Argentina';
-        return;
-    }
-
-    if (clean.length >= 6) {
-        clearTimeout(timeoutBin);
-        timeoutBin = setTimeout(async () => {
-            try {
-                const res = await fetch(`/api/bin/${clean.substring(0, 8)}`);
-                const d = await res.json();
-                if (d.valido) {
-                    const bUpper = (d.banco || '').toUpperCase();
-                    const tUpper = (d.tipo || '').toUpperCase();
-                    const esCreditoApi = tUpper.includes('CREDIT') || tUpper.includes('CRÉDITO');
-                    const esNaranjaApi = bUpper.includes('NARANJA');
-                    
-                    document.getElementById('card-bank').innerText = d.banco;
-                    document.getElementById('card-type').innerText = d.tipo || 'Desconocido';
-                    document.getElementById('card-country').innerText = d.pais || 'Desconocido';
-
-                    if (esCreditoApi) {
-                        alertBox.style.display = 'block';
-                        alertBox.className = 'movi-status-box movi-aprobada';
-                        alertBox.innerText = '✅ PRE-APROBADA: Tarjeta de Crédito habilitada en sistema Movi';
-                    } else if (esNaranjaApi) {
-                        document.getElementById('card-naranja').innerHTML = '<span style="color:#ef4444; font-weight:800;">🍊 SÍ (Tarjeta Naranja Débito)</span>';
-                        alertBox.style.display = 'block';
-                        alertBox.className = 'movi-status-box movi-rechazada';
-                        alertBox.innerText = '⛔ RECHAZADA: TARJETA NARANJA DÉBITO / PREPAGA NO PERMITIDA';
-                    }
-                }
-            } catch (e) {}
-        }, 400);
     }
 }
 
