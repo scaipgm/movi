@@ -53,14 +53,14 @@
         /* Layout Grid Principal */
         .layout-wrapper {
             display: grid;
-            grid-template-columns: 240px minmax(0, 720px) 260px;
+            grid-template-columns: 240px minmax(0, 720px) 300px;
             gap: 15px;
-            max-width: 1300px;
+            max-width: 1360px;
             margin: 0 auto;
             align-items: start;
         }
 
-        @media (max-width: 1024px) {
+        @media (max-width: 1100px) {
             .layout-wrapper {
                 grid-template-columns: 1fr;
             }
@@ -78,7 +78,7 @@
         .side-panel h3 {
             margin-top: 0;
             margin-bottom: 12px;
-            font-size: 15px;
+            font-size: 14px;
             color: var(--primary);
             border-bottom: 1px solid var(--border-color);
             padding-bottom: 6px;
@@ -93,7 +93,7 @@
 
         .price-group-title {
             font-weight: 800;
-            font-size: 12px;
+            font-size: 11px;
             color: var(--text-label);
             text-transform: uppercase;
             margin-bottom: 6px;
@@ -108,7 +108,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 4px 0;
+            padding: 5px 0;
             border-bottom: 1px dashed var(--border-color);
         }
 
@@ -277,13 +277,13 @@
         }
     </style>
 </head>
-<body>
+<body class="dark-mode">
 
 <div class="layout-wrapper">
 
-    <!-- PANEL IZQUIERDO: PRECIOS RESIDENCIAL -->
+    <!-- PANEL IZQUIERDO: PRECIOS RESIDENCIALES -->
     <div class="side-panel">
-        <h3>💵 Precios Servicios</h3>
+        <h3>💵 Precios Residenciales</h3>
 
         <div class="price-group">
             <span class="price-group-title">Alta Compe</span>
@@ -487,52 +487,35 @@
         <h3>💼 Precios PyME</h3>
 
         <div class="price-group">
-            <span class="price-group-title">PyME Alta Compe</span>
+            <span class="price-group-title">PyME Alta Compe (Base / +22% / +44%)</span>
             <div class="price-row">
                 <span>300 MB</span>
-                <span class="price-val" style="color:var(--primary);">$15.700</span>
+                <span class="price-val" style="font-size:11px;">$15.700 / <span style="color:#eab308;">$19.154</span> / <span style="color:#ef4444;">$22.608</span></span>
             </div>
             <div class="price-row">
                 <span>600 MB</span>
-                <span class="price-val" style="color:var(--primary);">$18.100</span>
+                <span class="price-val" style="font-size:11px;">$18.100 / <span style="color:#eab308;">$22.082</span> / <span style="color:#ef4444;">$26.064</span></span>
             </div>
             <div class="price-row">
                 <span>1 GB</span>
-                <span class="price-val" style="color:var(--primary);">$32.900</span>
+                <span class="price-val" style="font-size:11px;">$32.900 / <span style="color:#eab308;">$40.138</span> / <span style="color:#ef4444;">$47.376</span></span>
             </div>
         </div>
 
         <div class="price-group">
-            <span class="price-group-title">PyME Común</span>
+            <span class="price-group-title">PyME Común (Base / +22% / +44%)</span>
             <div class="price-row">
                 <span>600 MB</span>
-                <span class="price-val" style="color:var(--primary);">$21.500</span>
+                <span class="price-val" style="font-size:11px;">$21.500 / <span style="color:#eab308;">$26.230</span> / <span style="color:#ef4444;">$30.960</span></span>
             </div>
             <div class="price-row">
                 <span>1 GB</span>
-                <span class="price-val" style="color:var(--primary);">$32.900</span>
+                <span class="price-val" style="font-size:11px;">$32.900 / <span style="color:#eab308;">$40.138</span> / <span style="color:#ef4444;">$47.376</span></span>
             </div>
         </div>
 
-        <div class="price-group">
-            <span class="price-group-title">Escalón Incremental</span>
-            <div class="price-row">
-                <span>Meses 1 - 6</span>
-                <span class="price-val" style="color:#22c55e;">Base</span>
-            </div>
-            <div class="price-row">
-                <span>Meses 7 - 12</span>
-                <span class="price-val" style="color:#eab308;">+22%</span>
-            </div>
-            <div class="price-row">
-                <span>Meses 13+</span>
-                <span class="price-val" style="color:#ef4444;">+44%</span>
-            </div>
-        </div>
-
-        <div class="price-group" style="background: var(--box-bg); padding: 8px; border-radius: 6px; border: 1px solid var(--border-color); text-align: center;">
-            <span style="font-weight:bold; color:#22c55e; font-size:12px; display:block;">🏷️ Descuento Totalizado</span>
-            <span style="font-size:11px; color:var(--text-muted);">En PyME (Masiva o Común) el descuento por totalización es de <strong>-$3.300</strong></span>
+        <div class="legend-box">
+            ⚪ <span style="color:#22c55e; font-weight:bold;">Base</span> | 🟡 <span style="color:#eab308; font-weight:bold;">+22%</span> | 🔴 <span style="color:#ef4444; font-weight:bold;">+44%</span>
         </div>
     </div>
 
